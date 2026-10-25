@@ -1,0 +1,973 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LuckyPaws</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --page: #f8f2e9; --panel: #fffcf7; --soft: #f1e7d9; --soft-2: #e9dcc9; --line: #e5d7c3;
+    --ink: #3a2a1f; --muted: #8b7563; --accent: #7a5236; --accent-2: #a3794f; --accent-ink: #fffaf2;
+    --deep: #4b3426; --bad: #a3412d;
+    --radius: 16px; --shadow: 0 1px 2px rgba(58,42,31,.05), 0 8px 24px rgba(58,42,31,.06);
+    --font: "Nunito", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { background: var(--page); }
+  body { margin: 0; color: var(--ink); font: 15.5px/1.6 var(--font); }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  a { color: var(--accent); }
+  img.ph { display: inline-block; vertical-align: middle; object-fit: cover; background: #fff; border-radius: 50%; border: 1.5px solid var(--line); flex: none; }
+
+  header { background: var(--panel); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 5; }
+  .bar { max-width: 1120px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 12px; }
+  .logo { display: flex; align-items: center; gap: 10px; font: 800 21px/1 var(--font); color: var(--deep); text-decoration: none; letter-spacing: -.2px; }
+  .logo small { display: block; font: 600 11.5px/1.3 var(--font); color: var(--muted); letter-spacing: .3px; }
+  nav.menu { margin-left: auto; display: flex; gap: 2px; align-items: center; }
+  nav.menu a { padding: 7px 13px; border-radius: 999px; color: var(--muted); text-decoration: none; white-space: nowrap; font-size: 14.5px; font-weight: 700; }
+  nav.menu a:hover { color: var(--ink); background: var(--soft); }
+  nav.menu a.active { color: var(--deep); background: var(--soft); }
+  nav.menu a.sos { color: var(--accent-ink); background: var(--deep); }
+  nav.menu a.sos:hover, nav.menu a.sos.active { background: var(--accent); color: var(--accent-ink); }
+  .burger { display: none; margin-left: auto; border: 1px solid var(--line); background: var(--panel); border-radius: 10px; padding: 6px 12px; cursor: pointer; font-weight: 700; }
+  @media (max-width: 960px) {
+    .burger { display: block; }
+    nav.menu { display: none; position: absolute; top: 100%; left: 0; right: 0; flex-direction: column; align-items: stretch; background: var(--panel); border-bottom: 1px solid var(--line); padding: 8px 16px 14px; }
+    nav.menu.open { display: flex; }
+    nav.menu a { border-radius: 10px; }
+  }
+
+  main { max-width: 1120px; margin: 0 auto; padding: 30px 16px 64px; }
+  h1 { font: 800 30px/1.2 var(--font); margin: 0 0 6px; color: var(--deep); letter-spacing: -.3px; }
+  h2 { font: 800 19px/1.3 var(--font); margin: 0 0 12px; color: var(--deep); }
+  h3 { font: 700 16px/1.35 var(--font); margin: 0 0 4px; }
+  .lead { color: var(--muted); margin: 0 0 24px; max-width: 720px; }
+  .crumb { font-size: 13px; color: var(--muted); margin-bottom: 10px; font-weight: 600; }
+  .crumb a { color: var(--muted); }
+  .title-row { display: flex; align-items: center; gap: 14px; margin-bottom: 4px; }
+  .title-row h1 { margin: 0; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow); }
+  .grid { display: grid; gap: 16px; }
+  .g2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+  .g3 { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+  .g4 { grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
+
+  .hero { display: grid; grid-template-columns: 1.1fr 1fr; gap: 20px; align-items: center; background: var(--soft); border: 1px solid var(--line); border-radius: 24px; padding: 40px; margin-bottom: 22px; }
+  .hero h1 { font-size: 42px; line-height: 1.12; }
+  .hero h1 span { color: var(--accent-2); }
+  .hero p { color: var(--muted); max-width: 500px; font-size: 16.5px; }
+  .hero .tag { display: inline-block; color: var(--accent); border: 1px solid var(--soft-2); background: var(--panel); border-radius: 999px; padding: 3px 13px; font-size: 13px; font-weight: 700; margin-bottom: 14px; }
+  .collage { position: relative; height: 290px; }
+  .collage img { position: absolute; object-fit: contain; background: #fff; padding: 10px; border-radius: 50%; border: 1.5px solid var(--soft-2); box-shadow: 0 10px 24px rgba(58,42,31,.08); }
+  .collage .c1 { width: 210px; height: 210px; left: 6%; top: 48px; }
+  .collage .c2 { width: 158px; height: 158px; right: 6%; top: 0; }
+  .collage .c3 { width: 128px; height: 128px; right: 17%; bottom: 0; }
+  @media (max-width: 800px) { .hero { grid-template-columns: 1fr; padding: 26px; } .hero h1 { font-size: 32px; } .collage { height: 210px; width: 100%; max-width: 400px; margin: 0 auto; } .collage .c1 { width: 132px; height: 132px; top: 50px; } .collage .c2 { width: 110px; height: 110px; } .collage .c3 { width: 86px; height: 86px; } }
+
+  .sos-band { display: flex; gap: 16px; align-items: center; background: var(--panel); border: 1px solid var(--line); border-left: 5px solid var(--deep); border-radius: var(--radius); padding: 16px 20px; margin-bottom: 22px; flex-wrap: wrap; }
+  .sos-band h2 { margin: 0; }
+  .sos-band p { margin: 2px 0 0; color: var(--muted); font-size: 14.5px; }
+  .sos-band .btn { margin-left: auto; }
+
+  .dash { display: block; text-decoration: none; color: var(--ink); border-radius: 20px; overflow: hidden; border: 1px solid var(--line); background: var(--panel); box-shadow: var(--shadow); transition: transform .15s, box-shadow .15s; }
+  .dash:hover { transform: translateY(-2px); box-shadow: 0 14px 30px rgba(58,42,31,.1); }
+  .dash .banner { height: 180px; display: flex; align-items: center; justify-content: center; background: var(--soft); border-bottom: 1px solid var(--line); }
+  .dash .banner img { height: 150px; width: 150px; object-fit: contain; border-radius: 50%; background: #fff; padding: 8px; border: 1.5px solid var(--soft-2); }
+  .dash .body { padding: 18px 22px 20px; }
+  .dash p { color: var(--muted); margin: 0 0 10px; }
+  .dash .go { color: var(--accent); font-weight: 800; font-size: 14px; }
+  .tile { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 18px; }
+  .tile .label { color: var(--muted); font-size: 13px; font-weight: 700; }
+  .tile .value { font: 800 28px/1.15 var(--font); color: var(--deep); }
+  .option { display: block; text-decoration: none; color: var(--ink); padding: 18px 20px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel); transition: border-color .15s; cursor: pointer; }
+  .option:hover { border-color: var(--accent-2); }
+  .option p { margin: 0; color: var(--muted); font-size: 14px; }
+  .option .num { display: inline-block; font: 800 12px/1 var(--font); color: var(--accent); background: var(--soft); border-radius: 999px; padding: 4px 9px; margin-bottom: 6px; }
+
+  form.f { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; }
+  label.field { display: flex; flex-direction: column; gap: 5px; font-size: 13px; color: var(--muted); }
+  label.field > span:first-child { color: var(--ink); font-weight: 700; }
+  .field.wide { grid-column: 1 / -1; }
+  .req { color: var(--bad); }
+  input, select, textarea { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; min-width: 0; }
+  textarea { min-height: 84px; resize: vertical; }
+  input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent-2); outline-offset: 1px; }
+  .err { color: var(--bad); font-size: 12px; min-height: 15px; font-weight: 600; }
+  .hint { font-size: 12px; color: var(--muted); }
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; grid-column: 1 / -1; align-items: center; }
+  .btn { border: 1px solid var(--line); background: var(--panel); border-radius: 999px; padding: 9px 20px; cursor: pointer; text-decoration: none; color: var(--ink); display: inline-block; font-weight: 700; }
+  .btn:hover { border-color: var(--accent-2); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .btn.primary:hover { background: var(--deep); }
+  .btn.red { background: var(--deep); border-color: var(--deep); color: var(--accent-ink); }
+  .btn.small { padding: 5px 13px; font-size: 13px; }
+
+  .upload { border: 1.5px dashed var(--soft-2); border-radius: 14px; background: var(--page); padding: 16px; display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+  .upload input[type=file] { border: 0; background: none; padding: 0; }
+  .upload .preview { width: 96px; height: 96px; border-radius: 12px; object-fit: cover; border: 1px solid var(--line); }
+  .thumb { width: 52px; height: 52px; border-radius: 10px; object-fit: cover; border: 1px solid var(--line); cursor: zoom-in; display: block; }
+  #lightbox { position: fixed; inset: 0; background: rgba(43,30,22,.75); display: grid; place-items: center; z-index: 20; padding: 16px; cursor: zoom-out; }
+  #lightbox img { max-width: min(92vw, 720px); max-height: 85vh; border-radius: 14px; background: #fff; }
+
+  .table-wrap { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th, td { text-align: left; padding: 10px 9px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; white-space: nowrap; }
+  td .sub { display: block; font-size: 12px; color: var(--muted); }
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 800; white-space: nowrap; }
+  .b-open { background: var(--soft); color: var(--accent); }
+  .b-done { background: #ece6dc; color: #5f4b3b; }
+  .b-urgent { background: var(--deep); color: var(--accent-ink); }
+  .b-neutral { background: var(--soft); color: var(--muted); }
+  .empty { color: var(--muted); padding: 16px 2px; }
+  .note { background: var(--soft); border-radius: 12px; padding: 12px 16px; font-size: 14px; color: var(--ink); }
+  .note.red { background: #f4e4d8; border-left: 4px solid var(--deep); }
+  .note.green { background: #efe9df; border-left: 4px solid var(--accent-2); }
+  .note.amber { background: #f6ebd9; border-left: 4px solid var(--accent-2); }
+
+  .petcard { display: flex; gap: 14px; align-items: center; padding: 16px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel); cursor: pointer; color: var(--ink); transition: border-color .15s; }
+  .petcard:hover { border-color: var(--accent-2); }
+  .avatar { width: 62px; height: 62px; flex: none; }
+  .avatar img.ph { width: 100%; height: 100%; }
+  .petcard .sub { color: var(--muted); font-size: 13px; }
+  dl.facts { display: grid; grid-template-columns: max-content 1fr; gap: 6px 18px; margin: 0; font-size: 14px; }
+  dl.facts dt { color: var(--muted); }
+  dl.facts dd { margin: 0; }
+
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+  .tabs button { border: 1px solid var(--line); background: var(--panel); border-radius: 999px; padding: 6px 15px; cursor: pointer; font-size: 14px; font-weight: 700; color: var(--ink); }
+  .tabs button.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  ul.clean { margin: 0; padding-left: 20px; }
+  ul.clean li { margin: 4px 0; }
+  ol.steps { margin: 0; padding-left: 22px; }
+  ol.steps li { margin: 6px 0; }
+
+  .em-head { background: var(--soft); border: 1px solid var(--line); border-left: 5px solid var(--deep); border-radius: var(--radius); padding: 20px 24px; margin-bottom: 20px; }
+  .em-head h1 { margin: 0; }
+  .em-head p { color: var(--muted); margin: 4px 0 0; }
+  .timer { color: var(--deep); font: 800 56px/1 var(--font); letter-spacing: 2px; margin: 8px 0 12px; }
+  .timer.over { color: var(--bad); animation: pulse 1s infinite; }
+  @keyframes pulse { 50% { opacity: .45; } }
+  .check { display: flex; gap: 10px; align-items: flex-start; padding: 9px 4px; border-bottom: 1px dashed var(--line); cursor: pointer; }
+  .check input { margin-top: 5px; width: 17px; height: 17px; accent-color: var(--accent); }
+  .gums { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+  .gum { border-radius: 12px; padding: 10px 12px; font-size: 13.5px; border: 1px solid var(--line); background: #fff; }
+  .gum b { display: block; }
+  .gum i { display: inline-block; width: 14px; height: 14px; border-radius: 50%; vertical-align: -2px; margin-right: 6px; border: 1px solid rgba(0,0,0,.15); }
+  .clinic { border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; background: var(--panel); display: flex; flex-direction: column; gap: 6px; color: var(--ink); }
+  .clinic .row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+
+  .chat { display: flex; flex-direction: column; height: min(62vh, 560px); }
+  .chat-log { flex: 1; overflow-y: auto; padding: 4px 2px 12px; display: flex; flex-direction: column; gap: 10px; }
+  .msg { max-width: 78%; padding: 10px 14px; border-radius: 16px; font-size: 14.5px; white-space: pre-line; }
+  .msg.bot { background: var(--soft); border-top-left-radius: 4px; }
+  .msg.me { background: var(--accent); color: var(--accent-ink); margin-left: auto; border-top-right-radius: 4px; }
+  .chat-input { display: flex; gap: 8px; border-top: 1px solid var(--line); padding-top: 12px; }
+  .chat-input input { flex: 1; }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+  .chip { border: 1px solid var(--line); background: var(--panel); border-radius: 999px; padding: 4px 13px; font-size: 13px; cursor: pointer; font-weight: 700; color: var(--ink); }
+  .chip:hover { border-color: var(--accent-2); }
+
+  #toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(20px); opacity: 0; background: var(--deep); color: var(--accent-ink); padding: 11px 18px; border-radius: 12px; font-size: 14px; font-weight: 700; transition: .2s; pointer-events: none; max-width: calc(100vw - 32px); text-align: center; z-index: 30; }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  footer { border-top: 1px solid var(--line); color: var(--muted); text-align: center; font-size: 13px; padding: 22px 16px; }
+  [hidden] { display: none !important; }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <a class="logo" href="#home" id="logo">
+      <span id="logo-img"></span>
+      <span>LuckyPaws<small>Rescue · Care · Connect</small></span>
+    </a>
+    <button class="burger" id="burger" aria-label="Open menu">&#9776; Menu</button>
+    <nav class="menu" id="menu">
+      <a href="#home" data-nav="home">Home</a>
+      <a href="#rescue" data-nav="rescue">Rescue &amp; Stray</a>
+      <a href="#mypet" data-nav="mypet">My Pet</a>
+      <a href="#emergency" data-nav="emergency" class="sos">Emergency Help</a>
+      <a href="#care" data-nav="care">Food &amp; Care</a>
+      <a href="#ask" data-nav="ask">Ask LuckyPaws</a>
+    </nav>
+  </div>
+</header>
+
+<main id="app"></main>
+<footer>LuckyPaws prototype &middot; Lakshmi Dheeraja &middot; data is stored only in this browser &middot; first aid tips do not replace a vet</footer>
+<div id="toast" role="status" aria-live="polite"></div>
+<datalist id="cities"></datalist>
+
+<script>
+/* ================= Data and rules ================= */
+const KEY = "luckypaws-v3";
+const now = new Date();
+const TODAY = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+const DAYS = (a, b) => Math.round((Date.parse(b) - Date.parse(a)) / 864e5);
+const ageYears = dob => {
+  const d = new Date(dob), t = new Date(TODAY);
+  let a = t.getFullYear() - d.getFullYear();
+  if (t.getMonth() < d.getMonth() || (t.getMonth() === d.getMonth() && t.getDate() < d.getDate())) a--;
+  return a;
+};
+const fmt = iso => iso ? iso.split("-").reverse().join("/") : "-";
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+/* Cute cartoon pet pictures (free illustrations from Unsplash, saved in images/) */
+const PHOTO = {
+  logo: "dog-beagle", dog: "dog-puppy", poodle: "dog-orange", guideDog: "dog-beagle", cat: "cat-kitten", catLove: "dog-bone", catSad: "missing-poster",
+  catWow: "cat-black", rabbit: "bunny", hug: "dog-happy", love: "dog-happy", bandage: "dog-pug", dizzy: "dog-sleep", vomit: "cat-rest",
+  breath: "cat-fluffy", steth: "dog-face", siren: "cat-orange", sos: "bird-parrot", home: "pets-beanbag", bone: "dog-eating",
+  chat: "bird-yellow", heart: "hamster", wave: "bunny-carrot", kitten: "cat-fluffy"
+};
+function em(name, size = 32, cls = "") {
+  return `<img class="ph ${cls}" src="images/${PHOTO[name] || name}.png" width="${size}" height="${size}" alt="">`;
+}
+const DOG_PICS = ["dog-puppy", "dog-beagle", "dog-orange"], CAT_PICS = ["cat-kitten", "cat-fluffy", "cat-orange"], OTHER_PICS = ["bunny", "bunny-carrot", "hamster", "bird-blue", "bunny-brown"];
+const petPic = (species, size, id = 0) => {
+  const list = species === "Dog" ? DOG_PICS : species === "Cat" ? CAT_PICS : OTHER_PICS;
+  return em(list[(id + list.length - 1) % list.length], size);
+};
+
+const REPORT_TYPES = {
+  stray:   { name: "Stray animal",   pic: "dog" },
+  injured: { name: "Injured animal", pic: "bandage" },
+  missing: { name: "Missing pet",    pic: "catSad" }
+};
+const pinOk = p => /^[1-9]\d{5}$/.test(String(p).trim());
+
+/* Sample clinic list for the prototype (names and numbers are placeholders, not real clinics) */
+const CLINICS = [
+  { name: "Banjara Pet Hospital", area: "Banjara Hills", city: "Hyderabad", pin: "500034", phone: "040 2400201", open24: true,  services: "Emergency, surgery, X-ray" },
+  { name: "Secunderabad Animal Emergency Centre", area: "Marredpally", city: "Hyderabad", pin: "500026", phone: "040 2400202", open24: true,  services: "Emergency, ICU, oxygen" },
+  { name: "Kukatpally Vet Care", area: "KPHB Colony", city: "Hyderabad", pin: "500072", phone: "040 2400203", open24: false, from: 9, to: 21, services: "Check-ups, vaccination" },
+  { name: "Gachibowli Pet Clinic", area: "Gachibowli", city: "Hyderabad", pin: "500032", phone: "040 2400204", open24: false, from: 10, to: 20, services: "Check-ups, grooming, minor surgery" },
+  { name: "Happy Tails Pet Hospital", area: "Benz Circle", city: "Vijayawada", pin: "520010", phone: "0866 2400101", open24: true,  services: "Emergency, surgery, X-ray" },
+  { name: "Krishna Animal Emergency Centre", area: "Gunadala", city: "Vijayawada", pin: "520004", phone: "0866 2400102", open24: true,  services: "Emergency, ICU, oxygen" },
+  { name: "Labbipet Vet Care", area: "Labbipet", city: "Vijayawada", pin: "520010", phone: "0866 2400103", open24: false, from: 9, to: 21, services: "Check-ups, vaccination" },
+  { name: "PawsFirst Emergency Vet", area: "Kothapet", city: "Guntur", pin: "522001", phone: "0863 2400104", open24: true,  services: "Emergency, poisoning care, lab" },
+  { name: "Guntur Animal Care Clinic", area: "Brodipet", city: "Guntur", pin: "522002", phone: "0863 2400105", open24: false, from: 9, to: 21, services: "Check-ups, vaccination, grooming" },
+  { name: "Mangalagiri Pet Clinic", area: "Main Road", city: "Mangalagiri", pin: "522503", phone: "0864 2400106", open24: false, from: 10, to: 20, services: "Check-ups, minor surgery" },
+  { name: "Amaravati Pet Clinic", area: "Thullur", city: "Amaravati", pin: "522237", phone: "0864 2400107", open24: false, from: 9, to: 19, services: "Check-ups, vaccination" },
+  { name: "Tenali Round-the-Clock Vet", area: "Bose Road", city: "Tenali", pin: "522201", phone: "0864 2400108", open24: true,  services: "Emergency, surgery" }
+];
+const CITIES = ["Hyderabad", "Secunderabad", "Vijayawada", "Guntur", "Amaravati", "Mangalagiri", "Tenali", "Visakhapatnam", "Warangal"];
+const openNow = c => c.open24 || (now.getHours() >= c.from && now.getHours() < c.to);
+const hoursText = c => c.open24 ? "Open 24/7" : `${c.from > 12 ? c.from - 12 + " pm" : c.from + " am"} – ${c.to > 12 ? c.to - 12 + " pm" : c.to + " am"}`;
+
+function sampleData() {
+  return {
+    nextReport: 7, nextPet: 4, nextContact: 2,
+    reports: [
+      { id: 1, type: "injured", species: "Dog", area: "Benz Circle", city: "Vijayawada", pin: "520010", landmark: "Near bus stop", date: "2026-10-24",
+        details: "Limping on back left leg, wound on paw", severity: "Urgent", reporter: "Kavya", phone: "9876500011", status: "Open" },
+      { id: 2, type: "stray", species: "Cat", area: "Brodipet", city: "Guntur", pin: "522002", landmark: "4th line market", date: "2026-10-22",
+        details: "Mother cat with 3 kittens, looks hungry", count: 4, reporter: "Rahul", phone: "9876500012", status: "Open" },
+      { id: 3, type: "missing", species: "Dog", area: "Labbipet", city: "Vijayawada", pin: "520010", landmark: "Near park gate", date: "2026-10-20",
+        details: "Bruno, brown Labrador, red collar", petName: "Bruno", reporter: "Sneha", phone: "9876500013", status: "Open" },
+      { id: 4, type: "stray", species: "Dog", area: "Thullur Road", city: "Amaravati", pin: "522237", landmark: "Petrol bunk", date: "2026-10-18",
+        details: "Friendly puppy, about 3 months old", count: 1, reporter: "Arjun", phone: "9876500014", status: "Rescued",
+        rescuer: "Paws Shelter Amaravati", outcome: "Taken to shelter" },
+      { id: 5, type: "injured", species: "Cat", area: "Kothapet", city: "Guntur", pin: "522001", landmark: "Behind temple", date: "2026-10-15",
+        details: "Eye infection", severity: "Serious", reporter: "Divya", phone: "9876500015", status: "Rescued",
+        rescuer: "Dr. Ramana (vet)", outcome: "Treated at vet clinic" },
+      { id: 6, type: "injured", species: "Dog", area: "Banjara Hills Road No. 12", city: "Hyderabad", pin: "500034", landmark: "Opposite the park", date: "2026-10-25",
+        details: "Puppy with a cut on its front leg", severity: "Serious", reporter: "Meghana", phone: "9876500016", status: "Open" }
+    ],
+    pets: [
+      { id: 1, name: "Coco", species: "Dog", breed: "Indie", sex: "Female", dob: "2022-06-12", weight: 18, colour: "Fawn", microchip: "",
+        records: [
+          { date: "2026-08-10", kind: "Vaccination", detail: "Anti-rabies booster", next: "2027-08-10" },
+          { date: "2026-05-02", kind: "Check-up", detail: "Healthy, weight 18 kg", next: "" },
+          { date: "2026-09-15", kind: "Deworming", detail: "Tablet given", next: "2026-12-15" } ] },
+      { id: 2, name: "Simba", species: "Cat", breed: "Persian", sex: "Male", dob: "2021-02-03", weight: 5.2, colour: "White", microchip: "985112003456789",
+        records: [ { date: "2026-07-20", kind: "Vaccination", detail: "FVRCP", next: "2027-07-20" } ] },
+      { id: 3, name: "Max", species: "Dog", breed: "German Shepherd", sex: "Male", dob: "2020-11-25", weight: 34, colour: "Black & tan", microchip: "",
+        records: [ { date: "2026-03-01", kind: "Vaccination", detail: "DHPPi + Lepto", next: "2026-11-05" } ] }
+    ],
+    contacts: [
+      { id: 1, name: "Dr. Ramana", relation: "Family vet", phone: "9876500020", address: "Kothapet Main Road", city: "Guntur", pin: "522001" }
+    ],
+    seizures: []
+  };
+}
+let S;
+function load() {
+  try { const r = localStorage.getItem(KEY); if (r) { S = JSON.parse(r); S.contacts = S.contacts || []; S.seizures = S.seizures || []; return; } } catch (e) {}
+  S = sampleData(); save();
+}
+function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); return true; } catch (e) { return false; } }
+
+/* ================= Small helpers ================= */
+const $ = s => document.querySelector(s);
+let toastT;
+function toast(m) { const t = $("#toast"); t.textContent = m; t.classList.add("show"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("show"), 3500); }
+const statusBadge = r => r.status === "Open"
+  ? (r.severity === "Urgent" ? '<span class="badge b-urgent">Urgent</span>' : '<span class="badge b-open">Open</span>')
+  : `<span class="badge b-done">${esc(r.status)}</span>`;
+function validate(rules) {        /* rules: [[fieldName, ok, message], ...] */
+  const e = {};
+  rules.forEach(([f, ok, msg]) => { if (!ok && !e[f]) e[f] = msg; });
+  document.querySelectorAll("[data-err]").forEach(s => { s.textContent = e[s.dataset.err] || ""; });
+  return Object.keys(e).length === 0;
+}
+const phoneOk = p => /^[6-9]\d{9}$/.test(p.trim());
+const textOk = (t, n = 2) => t.trim().length >= n;
+const pinField = (label = "PIN code") => `<label class="field"><span>${label} <span class="req">*</span></span><input name="pin" inputmode="numeric" maxlength="6" placeholder="6 digits, e.g. 500034"><span class="err" data-err="pin"></span></label>`;
+const PIN_MSG = "Enter a valid 6-digit PIN code.";
+const crumb = (...parts) => `<div class="crumb"><a href="#home">Home</a>${parts.map(p => " / " + p).join("")}</div>`;
+
+/* ================= Pages ================= */
+const PAGES = {};
+
+PAGES.home = () => {
+  const open = S.reports.filter(r => r.status === "Open").length;
+  const missingPets = S.reports.filter(r => r.status === "Open" && r.type === "missing").length;
+  return `
+  <section class="hero">
+    <div>
+      <span class="tag">Dogs · Cats · Bunnies · Birds · Every little pet</span>
+      <h1>Every paw deserves a <span>safe home.</span></h1>
+      <p>Report strays and injured animals, find missing pets, keep your pet's health records, and get help fast in a pet emergency &mdash; all in one place.</p>
+      <a class="btn primary" href="#report-injured">Report an injured animal</a>
+      <a class="btn" href="#mypet" style="margin-left:6px">Go to My Pet</a>
+    </div>
+    <div class="collage" aria-hidden="true">
+      <img class="c1" src="images/dog-puppy.png" alt=""><img class="c2" src="images/cat-kitten.png" alt=""><img class="c3" src="images/bunny.png" alt="">
+    </div>
+  </section>
+  <div class="sos-band">
+    <div><h2>Pet emergency?</h2><p>Seizures, poisoning, vomiting blood, breathing trouble &mdash; first-aid steps and 24/7 clinics near your PIN code.</p></div>
+    <a class="btn red" href="#emergency">Get emergency help</a>
+  </div>
+  <div class="grid g2" style="margin-bottom:22px">
+    <a class="dash" href="#rescue"><div class="banner"><img src="images/dog-orange.png" alt="Cartoon puppy"></div><div class="body"><h2>Rescue &amp; Stray</h2>
+      <p>Report a stray, an injured animal or a missing pet, with a photo, so help reaches it fast.</p><span class="go">Open dashboard &rarr;</span></div></a>
+    <a class="dash" href="#mypet"><div class="banner"><img src="images/dog-bone.png" alt="Cartoon puppy with a bone"></div><div class="body"><h2>My Pet</h2>
+      <p>Pet profiles, vaccinations and medical records, with reminders for what is due next.</p><span class="go">Open dashboard &rarr;</span></div></a>
+  </div>
+  <div class="grid g4" style="margin-bottom:22px">
+    <div class="tile"><div class="label">Open reports</div><div class="value">${open}</div></div>
+    <div class="tile"><div class="label">Missing pets</div><div class="value">${missingPets}</div></div>
+    <div class="tile"><div class="label">My pets</div><div class="value">${S.pets.length}</div></div>
+    <div class="tile"><div class="label">Emergency contacts</div><div class="value">${S.contacts.length}</div></div>
+  </div>
+  <div class="grid g3">
+    <a class="option" href="#emergency"><div><h3>Emergency Help</h3><p>First aid for emergencies and vet clinics near you.</p></div></a>
+    <a class="option" href="#care"><div><h3>Pet Food &amp; Care</h3><p>Feeding guides by age, and foods that are unsafe.</p></div></a>
+    <a class="option" href="#ask"><div><h3>Ask LuckyPaws</h3><p>Quick answers to common pet-care questions.</p></div></a>
+  </div>`;
+};
+
+/* ---------- Rescue & Stray ---------- */
+let reportFilter = "all";
+PAGES.rescue = () => {
+  const list = S.reports.filter(r => reportFilter === "all" || (reportFilter === "open" ? r.status === "Open" : r.type === reportFilter))
+    .sort((a, b) => b.date.localeCompare(a.date));
+  return `
+  ${crumb("Rescue &amp; Stray")}
+  <div class="title-row"><h1>Rescue &amp; Stray</h1></div>
+  <p class="lead">Choose what you would like to report. Reports are shared with volunteers and rescuers in the same area.</p>
+  <div class="grid g3" style="margin-bottom:24px">
+    <a class="option" href="#report-stray"><div><h3>Report a stray animal</h3><p>A dog or cat living on the street that needs food or shelter.</p></div></a>
+    <a class="option" href="#report-injured"><div><h3>Report an injured animal</h3><p>An animal that is hurt or sick and needs a vet.</p></div></a>
+    <a class="option" href="#report-missing"><div><h3>Report a missing pet</h3><p>Your pet is lost &mdash; alert people nearby.</p></div></a>
+  </div>
+  <div class="panel">
+    <h2>Recent reports</h2>
+    <div class="tabs" id="rfilter">
+      ${[["all", "All"], ["open", "Open"], ["stray", "Stray"], ["injured", "Injured"], ["missing", "Missing"]]
+        .map(([k, l]) => `<button data-f="${k}" class="${reportFilter === k ? "on" : ""}">${l}</button>`).join("")}
+    </div>
+    ${list.length ? `<div class="table-wrap"><table><thead><tr><th>#</th><th>Photo</th><th>Type</th><th>Animal</th><th>Where</th><th>Date</th><th>Details</th><th>Status</th></tr></thead><tbody>
+      ${list.map(r => `<tr><td>${r.id}</td><td>${r.photo ? `<img class="thumb" src="${r.photo}" alt="Photo for report ${r.id}" data-big="${r.id}">` : '<span class="sub">No photo</span>'}</td><td>${REPORT_TYPES[r.type].name}</td><td>${esc(r.species)}${r.count > 1 ? ` &times; ${r.count}` : ""}</td>
+        <td>${esc(r.area)}, ${esc(r.city)} &ndash; ${esc(r.pin || "")}<span class="sub">${esc(r.landmark)}</span></td><td>${fmt(r.date)}</td>
+        <td>${esc(r.details)}${r.rescuer ? `<span class="sub">Rescued by ${esc(r.rescuer)} &mdash; ${esc(r.outcome)}</span>` : ""}</td>
+        <td>${statusBadge(r)}</td></tr>`).join("")}
+    </tbody></table></div>` : '<p class="empty">No reports in this view.</p>'}
+  </div>`;
+};
+PAGES.rescue.after = () => {
+  $("#rfilter").addEventListener("click", e => { const b = e.target.closest("button"); if (b) { reportFilter = b.dataset.f; render(); } });
+  document.querySelectorAll("[data-big]").forEach(t => t.addEventListener("click", () => {
+    const box = document.createElement("div"); box.id = "lightbox";
+    box.innerHTML = `<img src="${t.src}" alt="${t.alt}">`;
+    box.addEventListener("click", () => box.remove()); document.body.appendChild(box);
+  }));
+};
+
+function reportForm(type) {
+  const t = REPORT_TYPES[type];
+  const extra = {
+    stray: `<label class="field"><span>How many animals? <span class="req">*</span></span><input name="count" inputmode="numeric" value="1"><span class="err" data-err="count"></span></label>`,
+    injured: `<label class="field"><span>How serious is it? <span class="req">*</span></span><select name="severity"><option value="">Select</option><option>Urgent</option><option>Serious</option><option>Minor</option></select><span class="err" data-err="severity"></span></label>`,
+    missing: `<label class="field"><span>Pet's name <span class="req">*</span></span><input name="petName"><span class="err" data-err="petName"></span></label>`
+  }[type];
+  const detailsLabel = { stray: "Condition (hungry, friendly, with puppies...)", injured: "Describe the injury", missing: "Breed, colour, collar and any marks" }[type];
+  const dateLabel = { stray: "Date seen", injured: "Date seen", missing: "Last seen on" }[type];
+  return `
+  ${crumb('<a href="#rescue">Rescue &amp; Stray</a>', t.name)}
+  <div class="title-row"><h1>Report ${type === "missing" ? "a missing pet" : "a" + (type === "injured" ? "n injured animal" : " stray animal")}</h1></div>
+  <p class="lead">${type === "injured" ? 'If the animal is bleeding heavily or cannot move, see <a href="#emergency">Emergency Help</a> for the nearest 24/7 clinic first, then file this report.' :
+    type === "missing" ? "Share clear details so people nearby can recognise your pet." : "Your report helps volunteers bring food, shelter or a vet."}</p>
+  <div class="panel">
+    <form class="f" id="rform" novalidate>
+      <label class="field"><span>Animal <span class="req">*</span></span><select name="species"><option value="">Select</option><option>Dog</option><option>Cat</option><option>Other</option></select><span class="err" data-err="species"></span></label>
+      ${extra}
+      <label class="field"><span>${dateLabel} <span class="req">*</span></span><input type="date" name="date" max="${TODAY}" value="${TODAY}"><span class="err" data-err="date"></span></label>
+      <label class="field"><span>Area / locality <span class="req">*</span></span><input name="area"><span class="err" data-err="area"></span></label>
+      <label class="field"><span>City <span class="req">*</span></span><input name="city" list="cities" placeholder="e.g. Hyderabad"><span class="err" data-err="city"></span></label>
+      ${pinField()}
+      <label class="field"><span>Landmark</span><input name="landmark"><span class="err"></span></label>
+      <label class="field wide"><span>${detailsLabel} <span class="req">*</span></span><textarea name="details"></textarea><span class="err" data-err="details"></span></label>
+      <div class="field wide"><span style="color:var(--ink);font-weight:700;font-size:13px">Photo of the ${type === "missing" ? "pet" : "animal"}</span>
+        <div class="upload"><img class="preview" id="photo-prev" alt="Selected photo" hidden>
+          <div><input type="file" id="photo" accept="image/*"><div class="hint">JPG or PNG, up to 10 MB. A clear photo helps rescuers recognise the ${type === "missing" ? "pet" : "animal"}.</div>
+          <button class="btn small" type="button" id="photo-clear" hidden style="margin-top:6px">Remove photo</button></div></div>
+        <span class="err" data-err="photo"></span></div>
+      <label class="field"><span>Your name <span class="req">*</span></span><input name="reporter"><span class="err" data-err="reporter"></span></label>
+      <label class="field"><span>Mobile number <span class="req">*</span></span><input name="phone" inputmode="numeric" maxlength="10"><span class="err" data-err="phone"></span></label>
+      <div class="actions"><button class="btn primary">Submit report</button><a class="btn" href="#rescue">Cancel</a></div>
+    </form>
+  </div>`;
+}
+/* Shrink an uploaded photo so it fits in the browser's storage */
+function shrinkPhoto(file) {
+  return new Promise((resolve, reject) => {
+    const img = new Image(), url = URL.createObjectURL(file);
+    img.onload = () => {
+      const k = Math.min(1, 640 / Math.max(img.width, img.height)), c = document.createElement("canvas");
+      c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url); resolve(c.toDataURL("image/jpeg", 0.72));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(); };
+    img.src = url;
+  });
+}
+let pendingPhoto = "";
+function reportAfter(type) {
+  return () => {
+  pendingPhoto = "";
+  const input = $("#photo"), prev = $("#photo-prev"), clear = $("#photo-clear"), perr = document.querySelector('[data-err="photo"]');
+  const reset = () => { pendingPhoto = ""; input.value = ""; prev.hidden = true; clear.hidden = true; };
+  input.addEventListener("change", async () => {
+    perr.textContent = "";
+    const file = input.files[0]; if (!file) return reset();
+    if (!file.type.startsWith("image/")) { reset(); perr.textContent = "Please choose an image file (JPG or PNG)."; return; }
+    if (file.size > 10 * 1024 * 1024) { reset(); perr.textContent = "This photo is larger than 10 MB."; return; }
+    try { pendingPhoto = await shrinkPhoto(file); prev.src = pendingPhoto; prev.hidden = false; clear.hidden = false; }
+    catch (e) { reset(); perr.textContent = "This image could not be opened. Try another photo."; }
+  });
+  clear.addEventListener("click", reset);
+  $("#rform").addEventListener("submit", e => {
+    e.preventDefault();
+    const f = Object.fromEntries(new FormData(e.target));
+    const ok = validate([
+      ["species", f.species, "Choose the animal."],
+      ["count", type !== "stray" || (/^\d+$/.test(f.count) && +f.count >= 1 && +f.count <= 50), "Enter a number from 1 to 50."],
+      ["severity", type !== "injured" || f.severity, "Choose how serious it is."],
+      ["petName", type !== "missing" || textOk(f.petName || ""), "Enter your pet's name."],
+      ["date", f.date && f.date <= TODAY, "Pick a date that is not in the future."],
+      ["area", textOk(f.area), "Enter the area."],
+      ["city", textOk(f.city), "Enter the city."],
+      ["pin", pinOk(f.pin), PIN_MSG],
+      ["details", textOk(f.details, 5), "Add a few words of description."],
+      ["reporter", textOk(f.reporter), "Enter your name."],
+      ["phone", phoneOk(f.phone), "Enter a valid 10-digit mobile number."]
+    ]);
+    if (!ok) return;
+    const r = { id: S.nextReport++, type, species: f.species, area: f.area.trim(), city: f.city.trim(), pin: f.pin.trim(), landmark: (f.landmark || "").trim(),
+      date: f.date, details: f.details.trim(), reporter: f.reporter.trim(), phone: f.phone.trim(), status: "Open" };
+    if (type === "stray") r.count = +f.count;
+    if (type === "injured") r.severity = f.severity;
+    if (type === "missing") r.petName = f.petName.trim();
+    if (pendingPhoto) r.photo = pendingPhoto;
+    S.reports.push(r);
+    let msg = `Report #${r.id} submitted${r.photo ? " with photo" : ""}. Thank you for helping!`;
+    if (!save() && r.photo) { delete r.photo; save(); msg = `Report #${r.id} submitted, but the photo was too large to store in this browser.`; }
+    pendingPhoto = ""; toast(msg);
+    reportFilter = "all"; location.hash = "#rescue";
+  });
+  };
+}
+["stray", "injured", "missing"].forEach(t => { PAGES["report-" + t] = () => reportForm(t); PAGES["report-" + t].after = reportAfter(t); });
+
+/* ---------- My Pet ---------- */
+function dueSoon() {
+  const items = [];
+  S.pets.forEach(p => p.records.forEach(r => { if (r.next) items.push({ pet: p, rec: r, days: DAYS(TODAY, r.next) }); }));
+  return items.filter(i => i.days <= 30).sort((a, b) => a.days - b.days);
+}
+PAGES.mypet = () => {
+  const due = dueSoon();
+  return `
+  ${crumb("My Pet")}
+  <div class="title-row"><h1>My Pet</h1></div>
+  <p class="lead">Your pets' profiles and health records in one place.</p>
+  ${due.length ? `<div class="note amber" style="margin-bottom:18px"><strong>Coming up:</strong> ${due.map(i => `${esc(i.pet.name)} &ndash; ${esc(i.rec.detail)} ${i.days < 0 ? `<b>overdue by ${-i.days} days</b>` : i.days === 0 ? "<b>due today</b>" : `due in ${i.days} days`}`).join(" &middot; ")}</div>` : ""}
+  <div class="grid g3" style="margin-bottom:22px">
+    ${S.pets.map(p => `<div class="petcard" data-pet="${p.id}"><div class="avatar">${petPic(p.species, 62, p.id)}</div>
+      <div><h3>${esc(p.name)}</h3><div class="sub">${esc(p.species)} &middot; ${esc(p.breed)} &middot; ${ageYears(p.dob)} yrs &middot; ${p.weight} kg</div></div></div>`).join("")}
+    <a class="petcard" href="#add-pet" style="text-decoration:none;justify-content:center;border-style:dashed"><b>+ Add a pet</b></a>
+  </div>`;
+};
+PAGES.mypet.after = () => document.querySelectorAll("[data-pet]").forEach(c => c.addEventListener("click", () => { location.hash = "#pet-" + c.dataset.pet; }));
+
+PAGES["add-pet"] = () => `
+  ${crumb('<a href="#mypet">My Pet</a>', "Add a pet")}
+  <div class="title-row"><h1>Add a pet</h1></div>
+  <div class="panel" style="margin-top:14px"><form class="f" id="pform" novalidate>
+    <label class="field"><span>Pet's name <span class="req">*</span></span><input name="name"><span class="err" data-err="name"></span></label>
+    <label class="field"><span>Species <span class="req">*</span></span><select name="species"><option value="">Select</option><option>Dog</option><option>Cat</option><option>Other</option></select><span class="err" data-err="species"></span></label>
+    <label class="field"><span>Breed <span class="req">*</span></span><input name="breed" placeholder="e.g. Indie, Persian"><span class="err" data-err="breed"></span></label>
+    <label class="field"><span>Sex <span class="req">*</span></span><select name="sex"><option value="">Select</option><option>Male</option><option>Female</option></select><span class="err" data-err="sex"></span></label>
+    <label class="field"><span>Date of birth <span class="req">*</span></span><input type="date" name="dob" max="${TODAY}"><span class="err" data-err="dob"></span></label>
+    <label class="field"><span>Weight (kg) <span class="req">*</span></span><input name="weight" inputmode="decimal"><span class="err" data-err="weight"></span></label>
+    <label class="field"><span>Colour / markings</span><input name="colour"><span class="err"></span></label>
+    <label class="field"><span>Microchip number</span><input name="microchip" inputmode="numeric" maxlength="15"><span class="hint">15 digits, if your pet has one</span><span class="err" data-err="microchip"></span></label>
+    <div class="actions"><button class="btn primary">Save pet</button><a class="btn" href="#mypet">Cancel</a></div>
+  </form></div>`;
+PAGES["add-pet"].after = () => $("#pform").addEventListener("submit", e => {
+  e.preventDefault();
+  const f = Object.fromEntries(new FormData(e.target));
+  const w = parseFloat(f.weight);
+  if (!validate([
+    ["name", textOk(f.name), "Enter the pet's name."], ["species", f.species, "Choose a species."], ["breed", textOk(f.breed), "Enter the breed."],
+    ["sex", f.sex, "Choose the sex."], ["dob", f.dob && f.dob <= TODAY, "Enter a date of birth that is not in the future."],
+    ["weight", w > 0 && w <= 120, "Enter the weight in kg."], ["microchip", !f.microchip || /^\d{15}$/.test(f.microchip), "A microchip number has 15 digits."]
+  ])) return;
+  const p = { id: S.nextPet++, name: f.name.trim(), species: f.species, breed: f.breed.trim(), sex: f.sex, dob: f.dob, weight: w,
+    colour: (f.colour || "").trim(), microchip: f.microchip || "", records: [] };
+  S.pets.push(p); save(); toast(`${p.name} added to My Pet.`); location.hash = "#pet-" + p.id;
+});
+
+function petPage(id) {
+  const p = S.pets.find(x => x.id === id);
+  if (!p) return '<p class="empty">Pet not found.</p>';
+  const recs = p.records.slice().sort((a, b) => b.date.localeCompare(a.date));
+  return `
+  ${crumb('<a href="#mypet">My Pet</a>', esc(p.name))}
+  <div class="grid g2">
+    <div class="panel">
+      <div style="display:flex;gap:14px;align-items:center;margin-bottom:14px"><div class="avatar">${petPic(p.species, 62, p.id)}</div><div><h1 style="margin:0">${esc(p.name)}</h1><div class="crumb" style="margin:0">${esc(p.species)} &middot; ${esc(p.breed)}</div></div></div>
+      <dl class="facts">
+        <dt>Sex</dt><dd>${esc(p.sex)}</dd><dt>Date of birth</dt><dd>${fmt(p.dob)} (${ageYears(p.dob)} years)</dd>
+        <dt>Weight</dt><dd>${p.weight} kg</dd><dt>Colour</dt><dd>${esc(p.colour) || "-"}</dd><dt>Microchip</dt><dd>${esc(p.microchip) || "Not chipped"}</dd>
+      </dl>
+    </div>
+    <div class="panel">
+      <h2>Add a health record</h2>
+      <form class="f" id="mform" novalidate>
+        <label class="field"><span>Date <span class="req">*</span></span><input type="date" name="date" max="${TODAY}" value="${TODAY}"><span class="err" data-err="date"></span></label>
+        <label class="field"><span>Type <span class="req">*</span></span><select name="kind"><option value="">Select</option><option>Vaccination</option><option>Deworming</option><option>Check-up</option><option>Treatment</option></select><span class="err" data-err="kind"></span></label>
+        <label class="field wide"><span>Details <span class="req">*</span></span><input name="detail" placeholder="e.g. Anti-rabies booster"><span class="err" data-err="detail"></span></label>
+        <label class="field"><span>Next due on</span><input type="date" name="next"><span class="err" data-err="next"></span></label>
+        <div class="actions"><button class="btn primary">Add record</button></div>
+      </form>
+    </div>
+  </div>
+  <div class="panel" style="margin-top:16px">
+    <h2>Medical records</h2>
+    ${recs.length ? `<div class="table-wrap"><table><thead><tr><th>Date</th><th>Type</th><th>Details</th><th>Next due</th></tr></thead><tbody>
+      ${recs.map(r => { const d = r.next ? DAYS(TODAY, r.next) : null;
+        return `<tr><td>${fmt(r.date)}</td><td>${esc(r.kind)}</td><td>${esc(r.detail)}</td>
+        <td>${r.next ? `${fmt(r.next)} ${d < 0 ? '<span class="badge b-urgent">Overdue</span>' : d <= 30 ? '<span class="badge b-open">Due soon</span>' : ""}` : "-"}</td></tr>`; }).join("")}
+    </tbody></table></div>` : '<p class="empty">No records yet.</p>'}
+  </div>`;
+}
+function petAfter(id) {
+  $("#mform") && $("#mform").addEventListener("submit", e => {
+    e.preventDefault();
+    const f = Object.fromEntries(new FormData(e.target));
+    if (!validate([["date", f.date && f.date <= TODAY, "Pick a date that is not in the future."], ["kind", f.kind, "Choose a type."],
+                   ["detail", textOk(f.detail, 3), "Add the details."], ["next", !f.next || f.next > f.date, "The next date must be after the record date."]])) return;
+    const p = S.pets.find(x => x.id === id);
+    p.records.push({ date: f.date, kind: f.kind, detail: f.detail.trim(), next: f.next || "" }); save();
+    toast("Health record added."); render();
+  });
+}
+
+/* ---------- Emergency Help ---------- */
+const EM_MENU = [
+  ["em-seizure", "dizzy", "Seizure / fits", "Shaking, paddling legs, drooling or falling over."],
+  ["em-poison", "catWow", "Suspected poisoning", "Ate chocolate, rat poison, medicines, lilies or chemicals."],
+  ["em-vomit", "vomit", "Vomiting / blood in vomit or stool", "Check how urgent it is and what to do."],
+  ["em-breathing", "breath", "Breathing difficulty / collapse", "Struggling to breathe, blue gums or fainting."],
+  ["em-clinics", "steth", "Find nearby veterinary clinics", "Search by your 6-digit PIN code or city."],
+  ["em-24x7", "siren", "Find 24/7 emergency clinic (sample list)", "Clinics that are open day and night."],
+  ["home", "home", "Return to main menu", "Go back to the LuckyPaws home page."]
+];
+const emHead = (pic, title, text) => `${crumb('<a href="#emergency">Emergency Help</a>', title)}
+  <div class="em-head"><div><h1>${title}</h1><p>${text}</p></div></div>`;
+const vetNote = `<div class="note red" style="margin-top:16px"><strong>First aid only.</strong> These steps help until you reach a vet; they do not replace one.
+  <a href="#em-24x7">Find a 24/7 clinic</a> &middot; <a href="#emergency">My emergency contacts</a></div>`;
+
+PAGES.emergency = () => `
+  ${crumb("Emergency Help")}
+  <div class="em-head"><div><h1>Emergency Help</h1><p>Stay calm, keep your pet still and warm, and choose what is happening.</p></div></div>
+  <div class="grid g2" style="margin-bottom:24px">
+    ${EM_MENU.map(([route, pic, title, text], i) => `<a class="option" href="#${route}">
+      <div><div class="num">${i + 1}.</div><h3>${title}</h3><p>${text}</p></div></a>`).join("")}
+  </div>
+  <div class="grid g2">
+    <div class="panel"><h2>My emergency contacts</h2>
+      ${S.contacts.length ? S.contacts.map(c => `<div class="clinic" style="margin-bottom:10px">
+        <div class="row"><h3 style="margin:0">${esc(c.name)}</h3><span class="badge b-neutral">${esc(c.relation)}</span></div>
+        <div class="hint">${esc(c.address)}, ${esc(c.city)} &ndash; ${esc(c.pin)}</div>
+        <div class="row"><a class="btn primary small" href="tel:${esc(c.phone)}">Call ${esc(c.phone)}</a>
+          <button class="btn small" data-del="${c.id}" type="button">Remove</button></div></div>`).join("")
+        : '<p class="empty">No contacts saved yet. Add your vet and a family member so they are one tap away.</p>'}
+    </div>
+    <div class="panel"><h2>Add a contact</h2>
+      <form class="f" id="cform" novalidate>
+        <label class="field"><span>Name <span class="req">*</span></span><input name="name"><span class="err" data-err="name"></span></label>
+        <label class="field"><span>Who is this? <span class="req">*</span></span><select name="relation"><option value="">Select</option><option>Family vet</option><option>Animal rescue / NGO</option><option>Family member</option><option>Neighbour</option><option>Other</option></select><span class="err" data-err="relation"></span></label>
+        <label class="field"><span>Mobile number <span class="req">*</span></span><input name="phone" inputmode="numeric" maxlength="10"><span class="err" data-err="phone"></span></label>
+        <label class="field"><span>Address <span class="req">*</span></span><input name="address" placeholder="House / street / area"><span class="err" data-err="address"></span></label>
+        <label class="field"><span>City <span class="req">*</span></span><input name="city" list="cities" placeholder="e.g. Hyderabad"><span class="err" data-err="city"></span></label>
+        ${pinField()}
+        <div class="actions"><button class="btn primary">Save contact</button></div>
+      </form>
+    </div>
+  </div>`;
+PAGES.emergency.after = () => {
+  document.querySelectorAll("[data-del]").forEach(b => b.addEventListener("click", () => {
+    S.contacts = S.contacts.filter(c => c.id !== +b.dataset.del); save(); toast("Contact removed."); render();
+  }));
+  $("#cform").addEventListener("submit", e => {
+    e.preventDefault();
+    const f = Object.fromEntries(new FormData(e.target));
+    if (!validate([["name", textOk(f.name), "Enter the name."], ["relation", f.relation, "Choose who this is."], ["phone", phoneOk(f.phone), "Enter a valid 10-digit mobile number."],
+                   ["address", textOk(f.address, 3), "Enter the address."], ["city", textOk(f.city), "Enter the city."], ["pin", pinOk(f.pin), PIN_MSG]])) return;
+    S.contacts.push({ id: S.nextContact++, name: f.name.trim(), relation: f.relation, phone: f.phone.trim(), address: f.address.trim(), city: f.city.trim(), pin: f.pin.trim() });
+    save(); toast(`${f.name.trim()} saved to emergency contacts.`); render();
+  });
+};
+
+/* 1. Seizure: steps and a seizure timer */
+let seizureStart = null, timerT = null;
+const mmss = s => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+PAGES["em-seizure"] = () => `
+  ${emHead("dizzy", "Seizure / fits", "Most seizures stop within 1–2 minutes. Time it &mdash; your vet will ask how long it lasted.")}
+  <div class="grid g2">
+    <div class="panel"><h2>Do this now</h2>
+      <ol class="steps">
+        <li>Stay calm and keep your hands <b>away from the mouth</b> &mdash; pets do not swallow their tongue, but they may bite by accident.</li>
+        <li>Move furniture and sharp objects away. Keep the pet away from stairs and water.</li>
+        <li>Do not hold the pet down. Dim the lights and keep the room quiet.</li>
+        <li>Start the timer below.</li>
+        <li>Afterwards, keep the pet warm and quiet. It may be confused or unsteady for a while.</li>
+      </ol>
+      <div class="note red" style="margin-top:14px"><strong>Go to a vet immediately if:</strong> the seizure lasts more than 5 minutes, there is more than one seizure in 24 hours, the pet does not wake up between seizures, it is the first seizure ever, or the pet may have eaten poison.</div>
+    </div>
+    <div class="panel" style="text-align:center"><h2>Seizure timer</h2>
+      <div class="timer" id="stimer">${seizureStart ? mmss(Math.floor((Date.now() - seizureStart) / 1000)) : "00:00"}</div>
+      <div id="smsg" class="hint" style="min-height:20px;margin-bottom:10px"></div>
+      <button class="btn ${seizureStart ? "" : "primary"}" id="sbtn" type="button">${seizureStart ? "Stop &ndash; seizure has ended" : "Start timer"}</button>
+      <h3 style="margin-top:20px;text-align:left">Seizure log</h3>
+      ${S.seizures.length ? `<div class="table-wrap"><table><thead><tr><th>Date</th><th>Time</th><th>Lasted</th></tr></thead><tbody>
+        ${S.seizures.slice().reverse().map(s => `<tr><td>${fmt(s.date)}</td><td>${esc(s.time)}</td><td>${mmss(s.secs)}${s.secs >= 300 ? ' <span class="badge b-urgent">Over 5 min</span>' : ""}</td></tr>`).join("")}
+      </tbody></table></div><p class="hint" style="text-align:left">Show this log to your vet.</p>` : '<p class="empty" style="text-align:left">No seizures logged.</p>'}
+    </div>
+  </div>${vetNote}`;
+PAGES["em-seizure"].after = () => {
+  const tick = () => {
+    const s = Math.floor((Date.now() - seizureStart) / 1000), t = $("#stimer"); if (!t) return;
+    t.textContent = mmss(s); t.classList.toggle("over", s >= 300);
+    $("#smsg").innerHTML = s >= 300 ? '<b style="color:var(--bad)">Over 5 minutes &mdash; take your pet to an emergency vet now.</b>' : "Timing the seizure...";
+  };
+  if (seizureStart) { tick(); timerT = setInterval(tick, 500); }
+  $("#sbtn").addEventListener("click", () => {
+    if (!seizureStart) { seizureStart = Date.now(); render(); return; }
+    const secs = Math.max(1, Math.floor((Date.now() - seizureStart) / 1000)), start = new Date(seizureStart);
+    S.seizures.push({ date: TODAY, time: start.toTimeString().slice(0, 5), secs }); save();
+    seizureStart = null; toast(`Seizure logged: ${mmss(secs)}.`); render();
+  });
+};
+
+/* 2. Suspected poisoning */
+const POISONS = {
+  "Chocolate or cocoa": ["Dark chocolate and cocoa powder are the most dangerous. Signs: vomiting, restlessness, fast heartbeat, shaking.", "Tell the vet your pet's weight, the type of chocolate and how much was eaten."],
+  "Grapes or raisins": ["Even a small amount can cause kidney failure in dogs.", "Go to a vet now, even if your dog seems fine."],
+  "Xylitol (sugar-free gum, sweets)": ["Causes a sudden drop in blood sugar and liver damage in dogs, often within 30–60 minutes.", "This is an emergency &mdash; go to a vet now."],
+  "Onion or garlic": ["Damages red blood cells. Weakness and pale gums can appear a few days later.", "Call your vet with how much was eaten."],
+  "Rat or mouse poison": ["Many rat poisons cause internal bleeding 3–5 days later, so the pet may look normal at first.", "Go to a vet now and take the packet with you."],
+  "Human medicines (paracetamol, ibuprofen)": ["Paracetamol is extremely poisonous to cats; painkillers can damage a dog's stomach and kidneys.", "Never give human medicines to pets. Go to a vet now with the strip or bottle."],
+  "Lilies (cats)": ["Every part of the lily &mdash; even pollen or vase water &mdash; can cause kidney failure in cats.", "This is an emergency &mdash; go to a vet now."],
+  "Tick / flea spray or dog spot-on on a cat": ["Some dog tick products (permethrin) cause shaking and seizures in cats.", "Go to a vet now. Take the product packet with you."],
+  "Cleaning products, phenyl or bleach": ["These can burn the mouth and throat.", "Do not make the pet vomit. Gently rinse the mouth with water and go to a vet."],
+  "Not sure / something else": ["Look around for open packets, spilled tablets or chewed plants.", "Call your vet and describe what you found."]
+};
+let poisonPick = "";
+PAGES["em-poison"] = () => `
+  ${emHead("catWow", "Suspected poisoning", "Act fast &mdash; many poisons do more harm the longer they stay in the body.")}
+  <div class="grid g2">
+    <div class="panel"><h2>Do this now</h2>
+      <ol class="steps">
+        <li>Move your pet away from the poison and remove anything left within reach.</li>
+        <li>Keep the packet, label, plant or a sample &mdash; take it to the vet.</li>
+        <li>Note <b>what</b> was eaten, <b>how much</b> and <b>when</b>.</li>
+        <li><b>Do not</b> make your pet vomit, and do not give milk, oil or salt, unless a vet tells you to.</li>
+        <li>Call your vet or go to the nearest emergency clinic straight away.</li>
+      </ol>
+    </div>
+    <div class="panel"><h2>What did your pet eat?</h2>
+      <label class="field"><span>Choose the closest match</span><select id="poison"><option value="">Select</option>
+        ${Object.keys(POISONS).map(k => `<option ${k === poisonPick ? "selected" : ""}>${k}</option>`).join("")}</select></label>
+      <div id="pinfo" style="margin-top:14px">${poisonPick ? `<div class="note red"><strong>${poisonPick}</strong><br>${POISONS[poisonPick][0]}<br><b>${POISONS[poisonPick][1]}</b></div>` : '<p class="hint">Pick an item to see what to do.</p>'}</div>
+    </div>
+  </div>${vetNote}`;
+PAGES["em-poison"].after = () => $("#poison").addEventListener("change", e => { poisonPick = e.target.value; render(); });
+
+/* 3. Vomiting: urgency checker */
+const VOMIT_FLAGS = [
+  "Blood in the vomit, or black / bloody stool",
+  "Vomited more than 3 times today, or cannot keep water down",
+  "Belly is swollen and hard, or retching with nothing coming up",
+  "Very weak, collapsed or not responding",
+  "Puppy, kitten, very old pet, or pet with an illness",
+  "May have eaten poison or an object (toy, bone, string)",
+  "Vomiting or diarrhoea for more than 24 hours"
+];
+let vomitChecked = null;
+PAGES["em-vomit"] = () => {
+  const flags = vomitChecked || [];
+  const result = vomitChecked === null ? "" : flags.length
+    ? `<div class="note red"><strong>Go to a vet now.</strong> ${flags.length} warning sign(s) ticked. A swollen belly with retching can be bloat, which is life-threatening, especially in large dogs. <a href="#em-24x7">Find a 24/7 clinic</a></div>`
+    : `<div class="note green"><strong>No warning signs &mdash; watch your pet at home.</strong>
+        <ul class="clean"><li>Give small sips of water often.</li><li>For a healthy adult pet, rest the stomach for a few hours (ask your vet), then give small bland meals such as plain boiled rice with boiled chicken (no bones, no spices).</li>
+        <li>Call your vet if it is not better within 24 hours, or if any warning sign appears.</li></ul></div>`;
+  return `
+  ${emHead("vomit", "Vomiting / blood in vomit or stool", "Tick everything that is true for your pet to see how urgent it is.")}
+  <div class="grid g2">
+    <div class="panel"><h2>Warning signs</h2>
+      <form id="vform">${VOMIT_FLAGS.map((t, i) => `<label class="check"><input type="checkbox" name="f" value="${i}" ${flags.includes(i) ? "checked" : ""}><span>${t}</span></label>`).join("")}
+        <div class="actions" style="margin-top:14px"><button class="btn primary">Check urgency</button><button class="btn" type="button" id="vreset">Clear</button></div></form>
+    </div>
+    <div class="panel"><h2>Result</h2>${result || '<p class="hint">Tick the signs and press <b>Check urgency</b>.</p>'}
+      <h3 style="margin-top:16px">Keep a note for the vet</h3><ul class="clean"><li>How many times, and when it started</li><li>Colour of the vomit or stool (take a photo)</li><li>Anything unusual your pet ate</li></ul>
+    </div>
+  </div>${vetNote}`;
+};
+PAGES["em-vomit"].after = () => {
+  $("#vform").addEventListener("submit", e => { e.preventDefault(); vomitChecked = [...e.target.querySelectorAll("input:checked")].map(x => +x.value); render(); });
+  $("#vreset").addEventListener("click", () => { vomitChecked = null; render(); });
+};
+
+/* 4. Breathing difficulty / collapse */
+PAGES["em-breathing"] = () => `
+  ${emHead("breath", "Breathing difficulty / collapse", "This is always an emergency. Do the first steps, then go to a vet straight away.")}
+  <div class="grid g2">
+    <div class="panel"><h2>Do this now</h2>
+      <ol class="steps">
+        <li>Keep your pet calm and still &mdash; stress makes breathing harder.</li>
+        <li>Check the mouth only if it is safe. Remove an object you can see easily; do not push your fingers deep into the throat.</li>
+        <li>Loosen or remove the collar. Keep the head and neck straight.</li>
+        <li>Carry a collapsed pet flat on a board, a blanket or in a box.</li>
+        <li>Call the clinic on the way so they are ready.</li>
+      </ol>
+      <div class="note amber" style="margin-top:14px"><strong>Heatstroke?</strong> Move to shade, wet the body with cool (not ice-cold) water and use a fan, then go to the vet.</div>
+      <div class="note red" style="margin-top:10px"><strong>Cats:</strong> a cat breathing with its mouth open is always an emergency.</div>
+    </div>
+    <div class="panel"><h2>Check the gum colour</h2>
+      <p class="hint">Lift the lip and look at the gums.</p>
+      <div class="gums">
+        <div class="gum"><b><i style="background:#f4a3b0"></i>Pink</b>Normal</div>
+        <div class="gum"><b><i style="background:#f3eded"></i>Pale or white</b>Shock or blood loss &mdash; emergency</div>
+        <div class="gum"><b><i style="background:#8a7bd1"></i>Blue or purple</b>Not enough oxygen &mdash; emergency</div>
+        <div class="gum"><b><i style="background:#b8b8b8"></i>Grey</b>Emergency</div>
+        <div class="gum"><b><i style="background:#e34b4b"></i>Bright red</b>Possible heatstroke or poisoning</div>
+        <div class="gum"><b><i style="background:#e8c75a"></i>Yellow</b>Liver problem &mdash; see a vet today</div>
+      </div>
+      <a class="btn red" href="#em-24x7" style="margin-top:16px">Find a 24/7 clinic</a>
+    </div>
+  </div>${vetNote}`;
+
+/* 5. Find nearby clinics by PIN code or city */
+let clinicSearch = null;
+function nearness(pin, c) {
+  if (c.pin === pin) return [0, "Same PIN code"];
+  if (c.pin.slice(0, 4) === pin.slice(0, 4)) return [1, "Very close"];
+  if (c.pin.slice(0, 3) === pin.slice(0, 3)) return [2, "Same district"];
+  if (c.pin.slice(0, 2) === pin.slice(0, 2)) return [3, "Nearby region"];
+  return [9, ""];
+}
+function clinicCard(c, label) {
+  return `<div class="clinic">
+    <div class="row"><h3 style="margin:0">${esc(c.name)}</h3>${c.open24 ? '<span class="badge b-urgent">24/7</span>' : ""}</div>
+    <div class="hint">${esc(c.area)}, ${esc(c.city)} &ndash; ${c.pin} &middot; ${esc(c.services)}</div>
+    <div class="row">${label ? `<span class="badge b-neutral">${label}</span>` : ""}<span class="badge ${openNow(c) ? "b-done" : "b-open"}">${openNow(c) ? "Open now" : "Closed now"}</span><span class="hint">${hoursText(c)}</span></div>
+    <div class="row"><button class="btn primary small" type="button" data-call="${esc(c.phone)}">Call ${esc(c.phone)}</button>
+      <a class="btn small" target="_blank" rel="noopener" href="https://www.google.com/maps/search/${encodeURIComponent("veterinary clinic " + c.area + " " + c.city + " " + c.pin)}">Directions</a></div>
+  </div>`;
+}
+PAGES["em-clinics"] = () => {
+  let results = "";
+  if (clinicSearch) {
+    const s = clinicSearch;
+    const list = s.pin
+      ? CLINICS.map(c => ({ c, n: nearness(s.pin, c) })).filter(x => x.n[0] < 9).sort((a, b) => a.n[0] - b.n[0] || b.c.open24 - a.c.open24)
+      : CLINICS.filter(c => c.city.toLowerCase() === s.city.toLowerCase()).map(c => ({ c, n: [0, ""] }));
+    results = `<h2 style="margin-top:22px">${list.length} clinic(s) ${s.pin ? "near PIN " + s.pin : "in " + esc(s.city)}</h2>
+      ${list.length ? `<div class="grid g2">${list.map(x => clinicCard(x.c, x.n[1])).join("")}</div>` : '<p class="empty">No clinic from the sample list is near this place.</p>'}
+      <p style="margin-top:14px"><a class="btn" target="_blank" rel="noopener" href="https://www.google.com/maps/search/${encodeURIComponent("veterinary clinic near " + (s.pin || s.city))}">Search all vet clinics near ${esc(s.pin || s.city)} on Google Maps</a></p>`;
+  }
+  return `
+  ${emHead("steth", "Find nearby veterinary clinics", "Enter your PIN code to see the closest clinics first.")}
+  <div class="panel">
+    <form class="f" id="clform" novalidate>
+      <label class="field"><span>PIN code</span><input name="pin" inputmode="numeric" maxlength="6" placeholder="e.g. 500034" value="${esc(clinicSearch && clinicSearch.pin || "")}"><span class="err" data-err="pin"></span></label>
+      <label class="field"><span>or City</span><select name="city"><option value="">Select</option>${[...new Set(CLINICS.map(c => c.city))].map(c => `<option ${clinicSearch && clinicSearch.city === c ? "selected" : ""}>${c}</option>`).join("")}</select><span class="err"></span></label>
+      <div class="actions"><button class="btn primary">Find clinics</button><button class="btn" type="button" id="geo">Use my location (Google Maps)</button></div>
+    </form>
+    ${results}
+  </div>
+  <p class="hint" style="margin-top:12px">Clinic names and phone numbers in LuckyPaws are a sample list for this prototype.</p>`;
+};
+function bindCalls() {
+  document.querySelectorAll("[data-call]").forEach(b => b.addEventListener("click", () =>
+    toast(`Sample clinic: in the real app this button would call ${b.dataset.call}.`)));
+}
+PAGES["em-clinics"].after = () => {
+  bindCalls();
+  $("#clform").addEventListener("submit", e => {
+    e.preventDefault();
+    const f = Object.fromEntries(new FormData(e.target)), pin = f.pin.trim();
+    if (!validate([["pin", pin ? pinOk(pin) : f.city, pin ? PIN_MSG : "Enter a PIN code or choose a city."]])) return;
+    clinicSearch = pin ? { pin, city: "" } : { pin: "", city: f.city }; render();
+  });
+  $("#geo").addEventListener("click", () => {
+    if (!navigator.geolocation) { toast("Location is not available in this browser."); return; }
+    toast("Finding your location...");
+    navigator.geolocation.getCurrentPosition(
+      p => window.open(`https://www.google.com/maps/search/veterinary+clinic/@${p.coords.latitude},${p.coords.longitude},14z`, "_blank", "noopener"),
+      () => toast("Location permission was not given. Enter your PIN code instead."));
+  });
+};
+
+/* 6. 24/7 emergency clinics (sample list) */
+let city24 = "All";
+PAGES["em-24x7"] = () => {
+  const all = CLINICS.filter(c => c.open24), cities = ["All", ...new Set(all.map(c => c.city))];
+  const list = all.filter(c => city24 === "All" || c.city === city24);
+  return `
+  ${emHead("siren", "Find 24/7 emergency clinic", "Sample list of clinics that are open day and night.")}
+  <div class="tabs" id="c24">${cities.map(c => `<button data-c="${c}" class="${c === city24 ? "on" : ""}">${c}</button>`).join("")}</div>
+  <div class="grid g2">${list.map(c => clinicCard(c, "")).join("")}</div>
+  <div class="note" style="margin-top:16px"><strong>Sample list:</strong> these clinics and numbers are placeholders for the prototype. <a href="#em-clinics">Search by PIN code</a></div>`;
+};
+PAGES["em-24x7"].after = () => {
+  bindCalls();
+  $("#c24").addEventListener("click", e => { const b = e.target.closest("button"); if (b) { city24 = b.dataset.c; render(); } });
+};
+
+/* ---------- Food & Care ---------- */
+const CARE = {
+  Dog: {
+    "Puppy (under 1 year)": { meals: "3–4 small meals a day until 6 months, then 3 meals", food: ["Good-quality puppy food", "Fresh water at all times", "Soft, soaked kibble for very young puppies"],
+      care: ["Vaccination course from 6–8 weeks, as your vet advises", "Deworming every 2–3 weeks until 3 months", "Short play and gentle training sessions"] },
+    "Adult (1–7 years)": { meals: "2 meals a day", food: ["Balanced adult dog food", "Cooked rice with boiled chicken or egg as an occasional home meal", "Fresh water at all times"],
+      care: ["Yearly vaccination boosters", "Deworming every 3 months", "Daily walks and exercise", "Tick and flea prevention"] },
+    "Senior (8+ years)": { meals: "2 smaller meals a day", food: ["Senior dog food, lower in calories", "Easy-to-chew food if teeth are weak"],
+      care: ["Vet check-up every 6 months", "Gentle, shorter walks", "Watch for joint stiffness and weight changes"] },
+    unsafe: ["Chocolate", "Grapes and raisins", "Onion and garlic", "Xylitol (sugar-free gum, sweets)", "Cooked bones", "Alcohol and caffeine"]
+  },
+  Cat: {
+    "Kitten (under 1 year)": { meals: "3–4 small meals a day", food: ["Kitten food (wet and dry)", "Fresh water at all times"],
+      care: ["Vaccination course from 8 weeks, as your vet advises", "Deworming as advised by your vet", "Litter training and safe play"] },
+    "Adult (1–10 years)": { meals: "2 meals a day", food: ["Balanced adult cat food (cats need meat-based protein)", "Some wet food to keep them hydrated"],
+      care: ["Yearly vaccination boosters", "Regular grooming, especially long-haired cats", "Clean litter box daily"] },
+    "Senior (11+ years)": { meals: "2–3 smaller meals a day", food: ["Senior cat food", "Plenty of water — older cats get dehydrated easily"],
+      care: ["Vet check-up every 6 months", "Watch for weight loss and changes in drinking", "Soft, warm resting places"] },
+    unsafe: ["Lilies (all parts are poisonous to cats)", "Onion and garlic", "Chocolate", "Grapes and raisins", "Cow's milk (upsets many cats' stomachs)", "Dog food as a regular diet"]
+  }
+};
+let careSpecies = "Dog", careStage = "Adult (1–7 years)";
+PAGES.care = () => {
+  const sp = CARE[careSpecies], stages = Object.keys(sp).filter(k => k !== "unsafe");
+  if (!stages.includes(careStage)) careStage = stages[1];
+  const g = sp[careStage];
+  return `
+  ${crumb("Pet Food &amp; Care")}
+  <div class="title-row"><h1>Pet Food &amp; Care</h1></div>
+  <p class="lead">General guidance for healthy dogs and cats. Your vet's advice comes first, especially for puppies, kittens and sick pets.</p>
+  <div class="tabs" id="care-sp">${["Dog", "Cat"].map(s => `<button data-s="${s}" class="${s === careSpecies ? "on" : ""}">${s}</button>`).join("")}</div>
+  <div class="tabs" id="care-st">${stages.map(s => `<button data-t="${s}" class="${s === careStage ? "on" : ""}">${s}</button>`).join("")}</div>
+  <div class="grid g3">
+    <div class="panel"><h2>Feeding</h2><p><b>${g.meals}</b></p><ul class="clean">${g.food.map(x => `<li>${x}</li>`).join("")}</ul></div>
+    <div class="panel"><h2>Care</h2><ul class="clean">${g.care.map(x => `<li>${x}</li>`).join("")}</ul></div>
+    <div class="panel"><h2>Never feed</h2><ul class="clean">${sp.unsafe.map(x => `<li>${x}</li>`).join("")}</ul></div>
+  </div>`;
+};
+PAGES.care.after = () => {
+  $("#care-sp").addEventListener("click", e => { const b = e.target.closest("button"); if (b) { careSpecies = b.dataset.s; careStage = ""; render(); } });
+  $("#care-st").addEventListener("click", e => { const b = e.target.closest("button"); if (b) { careStage = b.dataset.t; render(); } });
+};
+
+/* ---------- Ask LuckyPaws ---------- */
+const ANSWERS = [
+  { k: ["seizure", "fits", "fit ", "shaking", "convuls"], a: "Keep your hands away from the mouth, move things away so your pet cannot get hurt, and time the seizure. If it lasts more than 5 minutes or happens again, go to a vet now. Emergency Help → Seizure / fits has a timer and steps." },
+  { k: ["poison", "ate something", "rat ", "medicine", "tablet"], a: "Move your pet away from the poison, keep the packet, and go to a vet straight away. Do not make your pet vomit unless a vet tells you to. See Emergency Help → Suspected poisoning." },
+  { k: ["breath", "collapse", "faint", "blue gum", "pale gum"], a: "Breathing trouble or collapse is always an emergency. Keep your pet calm, loosen the collar and go to the nearest 24/7 clinic. See Emergency Help → Breathing difficulty / collapse." },
+  { k: ["blood in", "bloody", "black stool"], a: "Blood in vomit or stool needs a vet today. Use Emergency Help → Vomiting / blood in vomit or stool to check how urgent it is." },
+  { k: ["emergency", "bleeding", "accident", "hit by", "clinic", "hospital", "24/7", "vet near"], a: "This sounds like an emergency. Open Emergency Help to find vet clinics near your PIN code and the 24/7 emergency clinics. Keep the animal calm, warm and still on the way." },
+  { k: ["vaccin", "rabies", "injection", "booster"], a: "Puppies and kittens start their vaccination course at about 6–8 weeks, with boosters as your vet advises. Adult dogs and cats usually need yearly boosters, including anti-rabies. Save each vaccination in My Pet so LuckyPaws reminds you when the next one is due." },
+  { k: ["fever", "vomit", "diarrh", "not eating", "lethargic", "sick"], a: "A pet that stops eating, vomits repeatedly, has diarrhoea for more than a day, or is very weak should see a vet soon. Keep fresh water available and do not give human medicines — many are poisonous to pets." },
+  { k: ["chocolate", "grape", "onion", "garlic", "toxic", "unsafe", "lily", "lilies", "xylitol"], a: "Never give chocolate, grapes or raisins, onion, garlic or xylitol to pets. Lilies are very dangerous for cats. If your pet has eaten one of these, contact a vet immediately. The full list is in Food & Care." },
+  { k: ["food", "feed", "diet", "meal", "eat"], a: "Puppies and kittens need 3–4 small meals a day; adult dogs and cats usually eat 2 meals a day. Always keep fresh water out. See Food & Care for guides by age." },
+  { k: ["stray", "street"], a: "To help a stray, use Rescue & Stray → Report a stray animal with the exact area, PIN code and a landmark. Add a photo of the animal so rescuers can recognise it." },
+  { k: ["lost", "missing", "find my"], a: "Report your pet in Rescue & Stray → Report a missing pet with a clear description, the place and PIN code where it was last seen, and your number. A microchip makes it much easier to return a lost pet." },
+  { k: ["deworm", "worm"], a: "Puppies and kittens are dewormed often in their first months, then adult pets usually every 3 months. Ask your vet for the right medicine and dose for your pet's weight." },
+  { k: ["tick", "flea"], a: "Check your pet's ears, neck and paws for ticks after walks. Use a vet-approved tick and flea treatment regularly and keep bedding clean." },
+  { k: ["adopt"], a: "Adopting a rescued animal gives it a second chance. Visit local shelters, meet the animal a few times, and make sure you can give it food, vaccinations and time every day." }
+];
+let chat = [{ who: "bot", text: "Hi! I'm the LuckyPaws assistant. Ask me about food, vaccinations, health signs, emergencies, strays or missing pets.\n\nI answer from LuckyPaws' built-in pet-care guide. I'm not a vet — in an emergency, please go to a vet." }];
+function reply(q) {
+  const t = q.toLowerCase() + " ";
+  const hit = ANSWERS.find(x => x.k.some(k => t.includes(k)));
+  return hit ? hit.a : "I don't have an answer for that yet. Try asking about food, vaccinations, sickness, emergencies, toxic foods, strays or missing pets — or ask your vet.";
+}
+PAGES.ask = () => `
+  ${crumb("Ask LuckyPaws")}
+  <div class="title-row"><h1>Ask LuckyPaws</h1></div>
+  <p class="lead">Quick answers to common pet-care questions.</p>
+  <div class="panel chat">
+    <div class="chips" id="chips">${["What should my puppy eat?", "When are vaccinations due?", "My dog is having a seizure", "Is chocolate bad for dogs?", "My pet is missing"].map(c => `<button class="chip">${c}</button>`).join("")}</div>
+    <div class="chat-log" id="log">${chat.map(m => `<div class="msg ${m.who}">${esc(m.text)}</div>`).join("")}</div>
+    <form class="chat-input" id="askf"><input name="q" placeholder="Type your question..." autocomplete="off"><button class="btn primary">Send</button></form>
+  </div>`;
+PAGES.ask.after = () => {
+  const log = $("#log"); log.scrollTop = log.scrollHeight;
+  const send = q => { if (!q.trim()) return; chat.push({ who: "me", text: q.trim() }, { who: "bot", text: reply(q) }); render(); setTimeout(() => $("#askf").elements.q.focus()); };
+  $("#askf").addEventListener("submit", e => { e.preventDefault(); send(e.target.elements.q.value); });
+  $("#chips").addEventListener("click", e => { const b = e.target.closest(".chip"); if (b) send(b.textContent); });
+};
+
+/* ================= Theme and router ================= */
+function render() {
+  clearInterval(timerT);
+  const route = (location.hash || "#home").slice(1);
+  let html, after;
+  if (route.startsWith("pet-")) { const id = +route.slice(4); html = petPage(id); after = () => petAfter(id); }
+  else { const page = PAGES[route] || PAGES.home; html = page(); after = page.after; }
+  $("#app").innerHTML = html;
+  const section = route.startsWith("pet-") || route === "add-pet" ? "mypet" : route.startsWith("report-") ? "rescue"
+    : route.startsWith("em-") ? "emergency" : (PAGES[route] ? route : "home");
+  document.querySelectorAll("[data-nav]").forEach(a => a.classList.toggle("active", a.dataset.nav === section));
+  $("#menu").classList.remove("open");
+  if (after) after();
+}
+window.addEventListener("hashchange", () => { render(); window.scrollTo(0, 0); });
+$("#burger").addEventListener("click", () => $("#menu").classList.toggle("open"));
+$("#logo-img").innerHTML = em("logo", 42);
+$("#cities").innerHTML = CITIES.map(c => `<option value="${c}">`).join("");
+load();
+render();
+</script>
+</body>
+</html>
