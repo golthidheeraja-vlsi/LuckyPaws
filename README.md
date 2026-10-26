@@ -1,6 +1,6 @@
 # LuckyPaws – Animal Rescue & Pet Care
 
-C mini-project for **Introduction to Programming (F2+TF2)**, VIT-AP University.
+C mini-project for **Introduction to Programming (F2+TFF2)**, VIT-AP University.
 
 - **Student:** Golthi Sai Lakshmi Dheeraja (25BEV7035)
 - **Faculty:** Dr A. Manimuthu

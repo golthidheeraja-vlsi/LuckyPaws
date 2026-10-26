@@ -2,7 +2,7 @@
  * LuckyPaws - Animal Rescue and Pet Care System
  * Name   : GOLTHI SAI LAKSHMI DHEERAJA
  * Reg No : 25BEV7035
- * Course : Introduction to Programming (F2+TF2)
+ * Course : Introduction to Programming (F2+TFF2)
  */
 
 #include <stdio.h>
