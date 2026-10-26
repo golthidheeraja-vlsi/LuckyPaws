@@ -1,11 +1,8 @@
 /*
- * LuckyPaws - Animal Rescue, Pet Care and Pet Blood Donor System
+ * LuckyPaws - Animal Rescue and Pet Care System
  * Name   : GOLTHI SAI LAKSHMI DHEERAJA
  * Reg No : 25BEV7035
  * Course : Introduction to Programming (F2+TF2)
- *
- * Blood donor rules used: dogs 1-8 years and 25 kg or more, cats 1-8
- * years and 4.5 kg or more, 90 days gap between two donations.
  */
 
 #include <stdio.h>
@@ -14,7 +11,6 @@
 #define DATA_FILE     "luckypaws.dat"
 #define REPORT_FILE   "luckypaws_report.txt"
 #define MAX_RECORDS   10      /* health records kept per pet */
-#define DONATION_GAP  90      /* days between two blood donations */
 
 /* report types and status */
 #define STRAY    1
@@ -74,19 +70,6 @@ typedef struct {
 } Pet;
 
 typedef struct {
-    int  id;
-    char name[20];
-    char species[8];           /* Dog / Cat */
-    int  bloodType;            /* index into DOG_TYPES or CAT_TYPES */
-    Date dob;
-    float weight;
-    Date lastDonation;
-    char owner[30];
-    char phone[11];
-    char city[30];
-} Donor;
-
-typedef struct {
     const char *stage;
     const char *meals;
     const char *food;
@@ -100,19 +83,6 @@ typedef struct {
 
 const char *TYPE_NAMES[4]   = {"", "Stray", "Injured", "Missing"};
 const char *STATUS_NAMES[3] = {"Open", "Rescued", "Found"};
-const char *DOG_TYPES[2]    = {"DEA 1 negative", "DEA 1 positive"};
-const char *CAT_TYPES[3]    = {"A", "B", "AB"};
-
-/* [donor type][patient type]: 1 = donor blood can be given to the patient */
-const int DOG_COMPAT[2][2] = {
-    {1, 1},                    /* DEA 1 negative: universal donor */
-    {0, 1}                     /* DEA 1 positive: only to DEA 1 positive */
-};
-const int CAT_COMPAT[3][3] = {
-    {1, 0, 0},                 /* cats: same type only - no universal donor */
-    {0, 1, 0},
-    {0, 0, 1}
-};
 
 /* [species: 0 dog, 1 cat][life stage] */
 const CareGuide CARE[2][3] = {
@@ -144,7 +114,7 @@ const char *UNSAFE[2] = {
     "lilies (all parts), onion and garlic, chocolate, grapes and raisins, cow's milk, dog food as a diet"
 };
 
-#define NUM_ANSWERS 9
+#define NUM_ANSWERS 8
 const Answer ANSWERS[NUM_ANSWERS] = {
     {{"emergency", "bleeding", "accident", "poison", "seizure", "hit by", NULL},
      "This sounds like an emergency. Take the animal to the nearest vet right away and keep\n  it calm and warm. You can also file a report with menu option 2."},
@@ -153,11 +123,9 @@ const Answer ANSWERS[NUM_ANSWERS] = {
     {{"fever", "vomit", "diarrh", "not eating", "sick", NULL},
      "A pet that stops eating, keeps vomiting or is very weak should see a vet soon.\n  Never give human medicines - many are poisonous to pets."},
     {{"chocolate", "grape", "onion", "garlic", "toxic", "lily", NULL},
-     "Never give chocolate, grapes, onion, garlic or xylitol. Lilies are very dangerous\n  for cats. If eaten, contact a vet immediately. See menu option 8."},
+     "Never give chocolate, grapes, onion, garlic or xylitol. Lilies are very dangerous\n  for cats. If eaten, contact a vet immediately. See menu option 7."},
     {{"food", "feed", "diet", "meal", "eat", NULL},
-     "Puppies and kittens need 3-4 small meals a day; adults usually 2. Always keep fresh\n  water out. Menu option 8 has guides by age."},
-    {{"blood", "donor", "donate", "transfusion", NULL},
-     "Dogs 1-8 years and 25 kg+, and cats 1-8 years and 4.5 kg+, can usually donate if\n  healthy. DEA 1-negative dogs are universal donors; cats need the same blood type."},
+     "Puppies and kittens need 3-4 small meals a day; adults usually 2. Always keep fresh\n  water out. Menu option 7 has guides by age."},
     {{"stray", "street", "adopt", NULL},
      "Report a stray with menu option 1, giving the area and a landmark. To take care of\n  one yourself, use option 4 and record the outcome."},
     {{"lost", "missing", NULL},
@@ -169,12 +137,11 @@ const Answer ANSWERS[NUM_ANSWERS] = {
 /* dynamic arrays (file scope: shared by all functions) */
 Report *reports;  int reportCount, reportCap, nextReportId = 1;
 Pet    *pets;     int petCount,    petCap,    nextPetId    = 1;
-Donor  *donors;   int donorCount,  donorCap,  nextDonorId  = 1;
 Date today;
 
-/* file layout: version | 6 ints | reports | pets | donors */
-#define FILE_VERSION 2
-#define HEADER_SIZE ((long)(7 * sizeof(int)))
+/* file layout: version | 4 ints | reports | pets */
+#define FILE_VERSION 3
+#define HEADER_SIZE ((long)(5 * sizeof(int)))
 
 /* ------------------------------------------------------------------
  *  Own character and string functions (character arrays + pointers)
@@ -548,19 +515,6 @@ void growPets(void)
     pets = bigger;
 }
 
-void growDonors(void)
-{
-    Donor *bigger;
-
-    if (donorCount < donorCap)
-        return;
-    donorCap = donorCap ? donorCap * 2 : 8;
-    bigger = donors == NULL ? malloc(donorCap * sizeof(Donor)) : realloc(donors, donorCap * sizeof(Donor));
-    if (bigger == NULL)
-        outOfMemory();
-    donors = bigger;
-}
-
 /* recursive binary search over the ids (each list is always sorted by id) */
 int findReport(int low, int high, int id)
 {
@@ -587,73 +541,24 @@ int findPet(int low, int high, int id)
 }
 
 /* ------------------------------------------------------------------
- *  Blood donor rules
- * ------------------------------------------------------------------ */
-
-const char *bloodTypeName(const Donor *d)
-{
-    return strCompare(d->species, "Dog") == 0 ? DOG_TYPES[d->bloodType] : CAT_TYPES[d->bloodType];
-}
-
-int canGive(const char *species, int donorType, int patientType)
-{
-    if (strCompare(species, "Dog") == 0)
-        return DOG_COMPAT[donorType][patientType];
-    return CAT_COMPAT[donorType][patientType];
-}
-
-/* 0 = eligible, > 0 = days to wait, -1 = not eligible (*why says why) */
-int donorWait(const Donor *d, const char **why)
-{
-    int isDog = strCompare(d->species, "Dog") == 0;
-    int age = ageOn(d->dob, today);
-    long since;
-
-    *why = "";
-    if (age < 1)                              { *why = "under 1 year";        return -1; }
-    if (age > 8)                              { *why = "over 8 years";        return -1; }
-    if (isDog && d->weight < 25.0f)           { *why = "dog under 25 kg";     return -1; }
-    if (!isDog && d->weight < 4.5f)           { *why = "cat under 4.5 kg";    return -1; }
-    if (d->lastDonation.y == 0)
-        return 0;
-    since = dateToDays(today) - dateToDays(d->lastDonation);
-    if (since >= DONATION_GAP)
-        return 0;
-    *why = "90-day gap";
-    return (int)(DONATION_GAP - since);
-}
-
-/* asks for a blood type that suits the species */
-int readBloodType(const char *species)
-{
-    if (strCompare(species, "Dog") == 0) {
-        printf("  Blood type: 1. DEA 1 negative   2. DEA 1 positive\n");
-        return readInt("  Choose (1-2): ", 1, 2) - 1;
-    }
-    printf("  Blood type: 1. A   2. B   3. AB\n");
-    return readInt("  Choose (1-3): ", 1, 3) - 1;
-}
-
-/* ------------------------------------------------------------------
  *  File handling
  * ------------------------------------------------------------------ */
 
 int saveAll(void)
 {
     FILE *fp = fopen(DATA_FILE, "wb");
-    int header[7];
+    int header[5];
 
     if (fp == NULL) {
         printf("  ! Could not save to %s\n", DATA_FILE);
         return 0;
     }
     header[0] = FILE_VERSION;
-    header[1] = reportCount; header[2] = petCount; header[3] = donorCount;
-    header[4] = nextReportId; header[5] = nextPetId; header[6] = nextDonorId;
-    fwrite(header, sizeof(int), 7, fp);
+    header[1] = reportCount; header[2] = petCount;
+    header[3] = nextReportId; header[4] = nextPetId;
+    fwrite(header, sizeof(int), 5, fp);
     fwrite(reports, sizeof(Report), reportCount, fp);
     fwrite(pets, sizeof(Pet), petCount, fp);
-    fwrite(donors, sizeof(Donor), donorCount, fp);
     fclose(fp);
     return 1;
 }
@@ -675,28 +580,26 @@ void saveReport(int idx)
 int loadAll(void)
 {
     FILE *fp = fopen(DATA_FILE, "rb");
-    int header[7];
+    int header[5];
 
     if (fp == NULL)
         return 0;
     /* the file starts with a version number: a file from an older program is not used */
-    if (fread(header, sizeof(int), 7, fp) != 7 || header[0] != FILE_VERSION ||
-        header[1] < 0 || header[2] < 0 || header[3] < 0) {
+    if (fread(header, sizeof(int), 5, fp) != 5 || header[0] != FILE_VERSION ||
+        header[1] < 0 || header[2] < 0) {
         printf("  ! %s is from an older version or damaged - starting with sample data.\n", DATA_FILE);
         fclose(fp);
         return 0;
     }
-    reportCount = header[1]; petCount = header[2]; donorCount = header[3];
-    nextReportId = header[4]; nextPetId = header[5]; nextDonorId = header[6];
-    reportCap = reportCount + 8; petCap = petCount + 8; donorCap = donorCount + 8;
+    reportCount = header[1]; petCount = header[2];
+    nextReportId = header[3]; nextPetId = header[4];
+    reportCap = reportCount + 8; petCap = petCount + 8;
     reports = calloc(reportCap, sizeof(Report));
     pets    = calloc(petCap, sizeof(Pet));
-    donors  = calloc(donorCap, sizeof(Donor));
-    if (reports == NULL || pets == NULL || donors == NULL)
+    if (reports == NULL || pets == NULL)
         outOfMemory();
     if ((int)fread(reports, sizeof(Report), reportCount, fp) != reportCount ||
-        (int)fread(pets, sizeof(Pet), petCount, fp) != petCount ||
-        (int)fread(donors, sizeof(Donor), donorCount, fp) != donorCount) {
+        (int)fread(pets, sizeof(Pet), petCount, fp) != petCount) {
         fclose(fp);
         return 0;
     }
@@ -763,32 +666,10 @@ void addRecord(Pet *p, Date date, const char *kind, const char *detail, Date nex
     h->next = next;
 }
 
-void newDonor(const char *name, const char *species, int type, Date dob, float weight,
-                     Date last, const char *owner, const char *phone, const char *city)
-{
-    Donor *d;
-    Donor blankDonor = {0};
-
-    growDonors();
-    d = &donors[donorCount++];
-    *d = blankDonor;
-    d->id = nextDonorId++;
-    strCopy(d->name, name);
-    strCopy(d->species, species);
-    d->bloodType = type;
-    d->dob = dob;
-    d->weight = weight;
-    d->lastDonation = last;
-    strCopy(d->owner, owner);
-    strCopy(d->phone, phone);
-    strCopy(d->city, city);
-}
-
 void loadSampleData(void)
 {
     Report *r;
     Pet *p;
-    Date none = makeDate(0, 0, 0);
 
     r = newReport(INJURED, "Dog", "Benz Circle", "Vijayawada", "Near bus stop", makeDate(24, 10, 2026),
                   "Limping on back left leg, wound on paw", "Kavya", "9876500011");
@@ -819,12 +700,6 @@ void loadSampleData(void)
     addRecord(p, makeDate(20, 7, 2026), "Vaccination", "FVRCP", makeDate(20, 7, 2027));
     p = newPet("Max", "Dog", "German Shepherd", 'M', makeDate(25, 11, 2020), 34.0f, "Black and tan", "");
     addRecord(p, makeDate(1, 3, 2026), "Vaccination", "DHPPi + Lepto", makeDate(5, 11, 2026));
-
-    newDonor("Max", "Dog", 0, makeDate(25, 11, 2020), 34.0f, makeDate(1, 6, 2026), "Vamsi", "9876501234", "Amaravati");
-    newDonor("Rocky", "Dog", 1, makeDate(10, 4, 2021), 30.0f, makeDate(20, 9, 2026), "Kiran", "9123400001", "Vijayawada");
-    newDonor("Simba", "Cat", 0, makeDate(3, 2, 2021), 5.2f, none, "Lakshmi", "9000012345", "Guntur");
-    newDonor("Bella", "Dog", 0, makeDate(15, 1, 2017), 28.0f, none, "Priya", "8877665544", "Guntur");
-    newDonor("Luna", "Cat", 1, makeDate(8, 8, 2022), 4.8f, none, "Anjali", "6301234567", "Vijayawada");
 }
 
 /* ------------------------------------------------------------------
@@ -863,31 +738,6 @@ void printReportHeader(void)
 {
     printLine();
     printf("%-3s %-8s %-6s %-14s %-11s %-10s %-14s %s\n", "ID", "Type", "Animal", "Area", "City", "Date", "Details", "Status");
-    printLine();
-}
-
-void printDonor(const Donor *d)
-{
-    char status[32];
-    const char *why;
-    int wait = donorWait(d, &why);
-
-    if (wait == 0)
-        strCopy(status, "Eligible");
-    else if (wait > 0)
-        sprintf(status, "Wait %d days", wait);
-    else
-        sprintf(status, "Not eligible (%s)", why);
-    printf("%-3d %-8s %-4s %-15s %-4d %5.1f  %-11s %-16.16s %-10s %s\n",
-           d->id, d->name, d->species, bloodTypeName(d), ageOn(d->dob, today), d->weight,
-           d->city, d->owner, d->phone, status);
-}
-
-void printDonorHeader(void)
-{
-    printLine();
-    printf("%-3s %-8s %-4s %-15s %-4s %5s  %-11s %-16s %-10s %s\n",
-           "ID", "Pet", "Sp.", "Blood type", "Age", "Kg", "City", "Owner", "Phone", "Status");
     printLine();
 }
 
@@ -1235,108 +1085,6 @@ void myPetMenu(void)
 }
 
 /* ------------------------------------------------------------------
- *  Pet blood donors
- * ------------------------------------------------------------------ */
-
-void registerDonor(void)
-{
-    Donor d = {0};
-    const char *why;
-    int wait;
-
-    printf("\n--- Register a Pet Blood Donor ---\n");
-    printf("Rules: dogs 1-8 years and 25 kg+, cats 1-8 years and 4.5 kg+, 90 days between donations.\n");
-    readWords("Pet's name                : ", d.name, sizeof d.name);
-    readSpecies("Species (Dog/Cat)         : ", d.species, 0);
-    d.bloodType = readBloodType(d.species);
-    d.dob = readDate("Date of birth (dd/mm/yyyy): ", 0, 0);
-    d.weight = readFloat("Weight (kg)               : ", 0.5f, 120.0f);
-    for (;;) {
-        d.lastDonation = readDate("Last donation (dd/mm/yyyy, 0 if never): ", 1, 0);
-        if (d.lastDonation.y == 0 || compareDates(d.lastDonation, d.dob) > 0)
-            break;
-        printf("  ! The last donation must be after the date of birth.\n");
-    }
-    readWords("Owner's name              : ", d.owner, sizeof d.owner);
-    readPhone("Mobile number             : ", d.phone);
-    readWords("City                      : ", d.city, sizeof d.city);
-
-    growDonors();
-    d.id = nextDonorId++;
-    donors[donorCount++] = d;
-    saveAll();
-    wait = donorWait(&d, &why);
-    printf("\n  %s registered as donor %d. ", d.name, d.id);
-    if (wait == 0)
-        printf("Eligible to donate now.\n");
-    else if (wait > 0)
-        printf("Can donate again in %d days.\n", wait);
-    else
-        printf("Not eligible yet (%s).\n", why);
-}
-
-void findDonors(void)
-{
-    char species[8], city[30];
-    const Donor *d;
-    const char *why;
-    int patientType, found = 0;
-
-    printf("\n--- Find a Compatible Donor ---\n");
-    readSpecies("Patient species (Dog/Cat) : ", species, 0);
-    patientType = readBloodType(species);
-    readLine("City (Enter for all)      : ", city, sizeof city);
-
-    printf("\nCompatible blood types for this patient: ");
-    {
-        int t, n = strCompare(species, "Dog") == 0 ? 2 : 3;
-
-        for (t = 0; t < n; t++)
-            if (canGive(species, t, patientType))
-                printf("%s  ", strCompare(species, "Dog") == 0 ? DOG_TYPES[t] : CAT_TYPES[t]);
-    }
-    printf("\n\n");
-    for (d = donors; d < donors + donorCount; d++) {
-        if (strCompare(d->species, species) != 0 || !canGive(species, d->bloodType, patientType))
-            continue;
-        if (city[0] && !sameText(d->city, city))
-            continue;
-        if (donorWait(d, &why) != 0)
-            continue;
-        if (found++ == 0)
-            printDonorHeader();
-        printDonor(d);
-    }
-    if (found == 0)
-        printf("  No eligible donor right now. Contact your nearest veterinary blood bank.\n");
-    else {
-        printLine();
-        printf("%d eligible donor(s) found.\n", found);
-    }
-    if (strCompare(species, "Cat") == 0)
-        printf("Note: cats have no universal donor - the vet must cross-match the blood.\n");
-}
-
-void donorMenu(void)
-{
-    const Donor *d;
-
-    printf("\n--- Pet Blood Donors ---\n");
-    printf("1. Find a compatible donor  2. Register a donor  3. View all donors\n");
-    switch (readInt("Choice: ", 1, 3)) {
-    case 1: findDonors(); break;
-    case 2: registerDonor(); break;
-    default:
-        printf("\n");
-        printDonorHeader();
-        for (d = donors; d < donors + donorCount; d++)
-            printDonor(d);
-        printLine();
-        break;
-    }
-}
-
-/* ------------------------------------------------------------------
  *  Food & care, Ask LuckyPaws, export
  * ------------------------------------------------------------------ */
 
@@ -1370,8 +1118,8 @@ void askLuckyPaws(void)
     int i, k;
 
     printf("\n--- Ask LuckyPaws ---\n");
-    printf("Ask about food, vaccinations, sickness, toxic foods, strays, missing pets or blood\n");
-    printf("donation. Answers come from LuckyPaws' built-in guide - I am not a vet.\n");
+    printf("Ask about food, vaccinations, sickness, toxic foods, strays or missing pets.\n");
+    printf("Answers come from LuckyPaws' built-in guide - I am not a vet.\n");
     printf("Type 'back' to return to the menu.\n");
     for (;;) {
         readLine("\nYou: ", question, sizeof question);
@@ -1390,7 +1138,7 @@ void askLuckyPaws(void)
         if (i < NUM_ANSWERS)
             printf("LuckyPaws: %s\n", ANSWERS[i].answer);
         else
-            printf("LuckyPaws: I don't know that one yet. Try food, vaccination, sick, toxic,\n  stray, missing or blood - or ask your vet.\n");
+            printf("LuckyPaws: I don't know that one yet. Try food, vaccination, sick, toxic,\n  stray or missing - or ask your vet.\n");
     }
 }
 
@@ -1398,10 +1146,8 @@ void exportReport(void)
 {
     FILE *fp = fopen(REPORT_FILE, "w");
     const Report *r;
-    const Donor *d;
     char date[16], extra[40];
-    int open = 0, eligible = 0;
-    const char *why;
+    int open = 0;
 
     if (fp == NULL) {
         printf("  ! Could not create %s\n", REPORT_FILE);
@@ -1419,17 +1165,6 @@ void exportReport(void)
             open++;
     }
     fprintf(fp, "\nPets: %d   Open reports: %d   Animals helped: %d\n", petCount, open, reportCount - open);
-    fprintf(fp, "\nPet blood donors\n");
-    for (d = donors; d < donors + donorCount; d++) {
-        int w = donorWait(d, &why);
-
-        if (w == 0)
-            eligible++;
-        fprintf(fp, "  %-8s %-4s %-15s %-11s %s%s%s\n", d->name, d->species, bloodTypeName(d), d->city,
-                w == 0 ? "Eligible" : w > 0 ? "Waiting (90-day gap)" : "Not eligible (",
-                w < 0 ? why : "", w < 0 ? ")" : "");
-    }
-    fprintf(fp, "\nDonors: %d   Eligible now: %d\n", donorCount, eligible);
     fclose(fp);
     printf("\n  Summary written to %s\n", REPORT_FILE);
 }
@@ -1438,9 +1173,9 @@ void exportReport(void)
  *  Main menu (array of pointers to functions)
  * ------------------------------------------------------------------ */
 
-void (*const MENU_ACTIONS[11])(void) = {
+void (*const MENU_ACTIONS[10])(void) = {
     NULL, reportStray, reportInjured, reportMissing, rescueAnimal, viewReports,
-    myPetMenu, donorMenu, careGuide, askLuckyPaws, exportReport
+    myPetMenu, careGuide, askLuckyPaws, exportReport
 };
 
 void printMenu(void)
@@ -1456,7 +1191,7 @@ void printMenu(void)
     printf("\n====================================================\n");
     printf("     LuckyPaws - Rescue . Care . Connect\n");
     printf("====================================================\n");
-    printf(" Today: %s   Open reports: %d   Pets: %d   Donors: %d\n", date, open, petCount, donorCount);
+    printf(" Today: %s   Open reports: %d   Pets: %d\n", date, open, petCount);
     printf("----------------------------------------------------\n");
     printf(" RESCUE & STRAY\n");
     printf("  1. Report a stray animal\n");
@@ -1466,10 +1201,9 @@ void printMenu(void)
     printf("  5. View reports\n");
     printf(" MY PET & MORE\n");
     printf("  6. My Pet (profiles, health records, reminders)\n");
-    printf("  7. Pet blood donors\n");
-    printf("  8. Pet food & care guide\n");
-    printf("  9. Ask LuckyPaws\n");
-    printf(" 10. Export summary report\n");
+    printf("  7. Pet food & care guide\n");
+    printf("  8. Ask LuckyPaws\n");
+    printf("  9. Export summary report\n");
     printf("  0. Save and exit\n");
     printf("----------------------------------------------------\n");
 }
@@ -1483,12 +1217,12 @@ int main(void)
     if (!loadAll()) {
         loadSampleData();
         saveAll();
-        printf("First run: sample reports, pets and donors loaded into %s.\n", DATA_FILE);
+        printf("First run: sample reports and pets loaded into %s.\n", DATA_FILE);
     }
 
     do {
         printMenu();
-        choice = readInt("Enter your choice: ", 0, 10);
+        choice = readInt("Enter your choice: ", 0, 9);
         if (choice != 0)
             MENU_ACTIONS[choice]();          /* call through the function pointer */
     } while (choice != 0);
@@ -1497,6 +1231,5 @@ int main(void)
         printf("\nData saved to %s. Thank you for caring for animals!\n", DATA_FILE);
     free(reports);
     free(pets);
-    free(donors);
     return 0;
 }
